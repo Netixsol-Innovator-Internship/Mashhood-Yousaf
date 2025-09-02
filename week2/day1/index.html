@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Age Calculator</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+
+  <main
+    class="bg-gray-100 shadow-lg flex flex-col rounded-3xl rounded-br-[120px] items-center justify-center max-w-[95%] mx-auto sm:w-[85%] md:w-[75%] lg:w-[55%]  sm:h-[440px] ">
+    <div class="text mb-4">
+      <h2 class="italic"><strong>Calculate Your <strong class="text-purple-600 text-[19px] "> age</strong> with in a second</strong></h2>
+    </div>
+    <div class="backCard bg-white  rounded-3xl rounded-br-[120px]  ">
+      <div class="p-8 rounded-3xl rounded-br-[110px] shadow-lg max-w-lg w-full">
+        
+        <!-- Form Inputs -->
+        <form onsubmit="getValue(event)">
+          <div class="flex mr-12 sm:mr-24 gap-2 sm:gap-4 mb-6">
+            <!-- Day -->
+            <div class="flex-1">
+              <label for="userDay" class="block text-sm font-semibold text-gray-500 uppercase mb-1">Day</label>
+              <input id="userDay" type="number" placeholder="DD"
+                class="w-full border border-gray-300 rounded-md px-4 py-2 text-center font-bold" required>
+            </div>
+            <!-- Month -->
+            <div class="flex-1">
+              <label for="userMonth" class="block text-sm font-semibold text-gray-500 uppercase mb-1">Month</label>
+              <input id="userMonth" type="number" placeholder="MM"
+                class="w-full border border-gray-300 rounded-md px-4 py-2 text-center font-bold" required>
+            </div>
+            <!-- Year -->
+            <div class="flex-1">
+              <label for="userYear" class="block text-sm font-semibold text-gray-500 uppercase mb-1">Year</label>
+              <input id="userYear" type="number" placeholder="YYYY"
+                class="w-full border border-gray-300 rounded-md px-4 py-2 text-center font-bold" required>
+            </div>
+          </div>
+          <p id="errorText" class="text-red-500 text-sm m-0 p-0 "></p>
+
+          <!-- Divider with button -->
+          <div class="relative flex pb-6">
+            <!-- <hr class="border-t border-gray-300"> -->
+            <div class="line h-px w-full bg-gray-300 "></div>
+            <button type="submit"
+              class="absolute right-0 bottom-1 sm:bottom-0  bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full transition">
+              <img src="./assets/images/icon-arrow.svg" class=" w-4 sm:w-6" alt="">
+            </button>
+          </div>
+        </form>
+
+        <!-- Result Area -->
+        <div class=" text-3xl sm:text-5xl font-extrabold">
+          <p><span id="years" class="text-purple-600">--</span> <span class="italic">years</span></p>
+          <p><span id="months" class="text-purple-600">--</span> <span class="italic">months</span></p>
+          <p><span id="days" class="text-purple-600">--</span> <span class="italic">days</span></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+
+</html>

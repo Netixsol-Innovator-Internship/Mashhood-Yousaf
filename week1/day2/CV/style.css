@@ -1,0 +1,246 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  /* doing overflow hidden, just for safe purposes, otherwise cv is responsive with media queries */
+}
+
+
+.Container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  transition: all 0.3s ease-in-out;
+}
+
+
+.headerData {
+  text-align: center;
+}
+
+.headerData ul {
+  display: flex;
+  justify-content: center;
+  gap: 2rem; 
+    flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+}
+
+.headerData li {
+  list-style: none;
+  font-size: small;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+}
+
+/* some sections was same in layout, requires display flex, therefore using multiple selectors to reduce reduntant code */
+.profileSection,
+.summarySection,
+.experienceSection,
+.languagesData,
+.educationData,
+.certificationsData,
+.projectsData,
+.skillsData,
+.references {
+  display: flex;
+}
+.profileSection h4 {
+  margin-right: 10rem;
+}
+
+/* table rows and data to manage layout equally  */
+.profileSection table td {
+  padding-right: 8rem;
+}
+
+
+.summarySection h4 {
+  margin-right: 8rem;
+  /* margin-top: 0%; */
+  padding-top: 0%;
+}
+
+.experienceSection h4 {
+  margin-right: 6.6rem;
+}
+
+.experienceData {
+  display: flex;
+  flex-direction: column;
+}
+
+.firstExperience table td {
+  padding-right: 8rem;
+}
+
+.ExperienceDataSecond table td {
+  padding-right:11rem;
+}
+
+.year {
+  justify-content: right;
+}
+
+.education{
+  
+  margin-right: 7.1rem;
+}
+.educationData h4 {
+  margin-right: 7.1rem;
+}
+.educationData table td {
+  padding-right: 9rem;
+}
+
+.projectsData h4 {
+  margin-right: 8.3rem;
+}
+
+.skillsData h4 {
+  margin-right: 9.8rem;
+}
+
+.certificationsData h4 {
+  margin-right: 5.4rem;
+}
+.certificationsData table td {
+  padding-right: 2.9rem; 
+}
+
+.languagesData h4 {
+  margin-right: 6.6rem;
+}
+.languagesData table td {
+  /* background-color: aqua; */
+  padding-right: 15.2rem; 
+}
+.references h4 {
+  /* background-color: aqua; */
+  margin-right: 6.9rem;
+}
+/* #spanish {
+  margin: 11rem;
+} */
+
+.icon-text {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+/* media queries */
+
+/* For tablets (768px and lower) */
+@media (max-width: 768px) {
+  .Container {
+    padding: 1rem;
+  }
+
+  .profileSection table td,
+  .summarySection h4,
+  .experienceSection h4,
+  .educationData h4,
+  .projectsData h4,
+  .skillsData h4,
+  .certificationsData h4,
+  .languagesData h4,
+  .references h4 {
+    margin-right: 2rem;
+  }
+
+  .headerData ul {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .profileSection,
+  .summarySection,
+  .experienceSection,
+  .languagesData,
+  .educationData,
+  .certificationsData,
+  .projectsData,
+  .skillsData,
+  .references {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .profileSection table td,
+  .firstExperience table td,
+  .ExperienceDataSecond table td,
+  .educationData table td,
+  .certificationsData table td,
+  .languagesData table td,
+  .skillsData table td,
+  .projectsData table td {
+    padding-right: 1rem;
+    display: block;
+    width: 100%;
+  }
+
+  #spanish {
+    margin: 0;
+  }
+}
+
+/* For mobile phones (480px and lower) */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .headerData p {
+    font-size: 0.9rem;
+  }
+
+  .headerData li {
+    font-size: 0.8rem;
+  }
+
+  table {
+    width: 100%;
+    font-size: 0.85rem;
+  }
+
+  .experienceData ul {
+    padding-left: 1rem;
+  }
+
+  .experienceData p,
+  .experienceData ul li {
+    font-size: 0.9rem;
+  }
+
+  .certificationsData table td,
+  .languagesData table td,
+  .projectsData table td {
+    display: block;
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .skillsData table tr {
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .skillsData table td {
+    display: block;
+    width: 100%;
+    padding-right: 0;
+  }
+
+  #spanish {
+    margin: 0;
+  }
+}

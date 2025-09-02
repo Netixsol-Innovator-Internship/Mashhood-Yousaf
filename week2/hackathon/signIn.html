@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white flex justify-center items-center min-h-screen">
+
+  <div class="w-full max-w-[90%] sm:max-w-md mx-auto p-6 sm:p-8 rounded-lg">
+    <h1 class="text-3xl font-semibold text-center text-black my-7">Welcome Back</h1>
+
+    <form onsubmit="signIn(event)" class="mt-6">
+
+      <!-- Email Input -->
+      <div class="mb-4">
+        <input type="email" id="emailForLogin" placeholder="Enter your email"
+          class="w-full max-w-[530px] p-[10px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Password Input -->
+      <div class="mb-4">
+        <input type="password" id="passwordForLogin" placeholder="Enter your password"
+          class="w-full max-w-[530px] p-[10px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <p class="text-[rgba(97,115,138,1)] mb-4">Forgot Password?</p>
+
+      <!-- Sign Up Button -->
+      <button type="submit"
+        class="w-full max-w-[570px] p-[10px] bg-[rgba(13,120,242,1)] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Login</button>
+
+      <!-- Sign In Link -->
+      <div class="mt-5 text-center">
+        <p class="text-[rgba(97,115,138,1)]">Don't have an account? <a href="./signUp.html"
+            class="text-[rgba(97,115,138,1)]">Sign
+            Up</a>
+        </p>
+      </div>
+    </form>
+  </div>
+  <script src="./js/auth.js"></script>
+</body>
+
+</html>

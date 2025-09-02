@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hackathon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Reduced font loading for better performance -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+      }
+      .mobile-menu {
+        transition: all 0.3s ease-in-out;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-['Poppins']">
+  <!-- Header -->
+  <header class="text-white bg-black backdrop-blur-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <!-- Logo -->
+      <div class="w-20">
+        <h3 class="font-bold text-[20px] ml-[20px] md:ml-[45px]">LogoHere</h3>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <nav id="desktop-menu" class="hidden md:flex items-center space-x-4 lg:space-x-10 mr-[30px]">
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition">About</a>
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition">Collection</a>
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition">Creator</a>
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition">RoadMap</a>
+        <button
+          class="w-[123px] h-[44px] rounded-2xl font-bold text-sm bg-[rgba(218,143,77,1)] text-white border border-[rgba(255,255,255,1)] px-4 hover:bg-amber-700 transition">
+          Sign In
+        </button>
+      </nav>
+
+      <!-- Mobile Menu Button -->
+      <button id="toggleMenu" class="md:hidden text-white focus:outline-none mr-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div id="mobile-menu" class="mobile-menu hidden md:hidden w-full bg-black/90 backdrop-blur-lg pb-4 px-4">
+      <div class="flex flex-col space-y-4 items-center">
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition py-2">About</a>
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition py-2">Collection</a>
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition py-2">Creator</a>
+        <a href="#" class="font-semibold text-sm hover:text-amber-300 transition py-2">RoadMap</a>
+        <button
+          class="w-[123px] h-[44px] rounded-2xl font-bold text-sm bg-amber-600 text-white border border-white px-4 hover:bg-amber-700 transition mb-2">
+          Sign In
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <script>
+    document.getElementById('toggleMenu').addEventListener('click', function () {
+      const menu = document.getElementById('mobile-menu');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        menu.classList.add('block');
+      } else {
+        menu.classList.remove('block');
+        menu.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+</html>

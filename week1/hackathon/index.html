@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hackathon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,700&display=swap" rel="stylesheet">
+  <!-- CSS usage: -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+      }
+    }
+  </style>
+</head>
+
+<body class="font-['Poppins'] bg-black ">
+  <!-- Header -->
+  <header class=" text-white  bg-black/30 backdrop-blur-sm "
+    style="background-image: url('./images/bgEffectImage.png');">
+    <div class="container mx-auto px-4 md:px-0   py-4 flex justify-between items-center">
+      <!-- Logo -->
+      <div class="w-20">
+        <h3 class="font-bold font-poppins ml-[30px] sm:ml-[30px] md:ml-[20px] lg:ml-[45px]  sm:text-[20px] md:text-[18px] ">LogoHere</h3>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-4 lg:space-x-10  mr-[30px]  ">
+        <a href="#" class="font-semibold text-[14.6px] hover:text-amber-300">About</a>
+        <a href="#" class="font-semibold text-[14.6px] hover:text-amber-300">Collection</a>
+        <a href="#" class="font-semibold text-[14.6px] hover:text-amber-300">Creator</a>
+        <a href="#" class="font-semibold text-[14.6px] hover:text-amber-300">RoadMap</a>
+        <button
+          class="w-full md:w-[110.7px]  lg:w-[123px] md:h-[40px]  lg:h-[43.8px] rounded-2xl   font-bold text-[14px] bg-[rgba(218,143,77,1)] text-white border border-[rgba(255,255,255,1)] px-4 py-1 mt-2 md:mt-0">
+          Sign In
+        </button>
+      </nav>
+
+      <!-- Mobile Menu Button -->
+      <button class="mr-4 md:hidden text-white focus:outline-none">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-cover bg-bottom" style="background-image: url('./images/bgEffectImage.png');">
+    <div class="container mx-auto px-4 py-12 md:py-24">
+      <div class="flex flex-col bgsmber-400 mx-auto max-w-[800px] md:flex-row items-center justify-between text-white">
+        <!-- Left Content -->
+        <div class=" w-fit md:w-1/2 leading-6 mb-12 md:mb-0">
+          <h1 class="text-2xl md:text-3xl lg:text-[46px] font-bold leading-tight mls-8 sm:ml-0 mb-6">
+            <span class="block">We have high</span>
+            <span class="block my-4 ">Quality <span class="text-amber-500">NFT</span></span>
+            <span class="block">Collections</span>
+          </h1>
+
+          <p class="text-[12px] w-[200px] md:text-[14px] sm:w-[340px] font-medium  mb-8 max-w-md">
+            Lorem ipsum dolor sit amet consectetur. Rhoncus massa suspendisse turpis sed viverra tempus tortor.
+            Habitant accumsan sagittis in facilisi placerat ac.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <button
+              class="bg-[rgba(218,143,77,1)] text-white border border-white px-6 py-2 rounded-2xl font-semibold hover:bg-amber-700 transition">
+              Get Whitelist
+            </button>
+            <button
+              class="text-white border border-white px-6 py-2 rounded-2xl font-semibold hover:bg-white/10 transition">
+              ContactUs
+            </button>
+          </div>
+
+          <div class="glass p-4 rounded-2xl max-w-md">
+            <div class="flex justify-between">
+              <div>
+                <h3 class="font-bold font-mono text-lg">240K+</h3>
+                <p class="text-sm">Total Sales</p>
+              </div>
+              <div>
+                <h3 class="font-bold font-mono text-lg">100K+</h3>
+                <p class="text-sm">Auctions</p>
+              </div>
+              <div>
+                <h3 class="font-bold font-mono text-lg">240K+</h3>
+                <p class="text-sm">Artists</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Image -->
+        <div class="md:w-1/2 flex justify-center relative">
+          <img class="w-64 md:w-80 lg:w-96" src="./images/babyLionNft.png" alt="NFT Lion">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section class="bg-black py-12">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center">About Us</h2>
+    </div>
+  </section>
+
+  <!-- Wallet Section -->
+  <section class="bg-cover bg-bottom py-12" style="background-image: url('./images/rectangle.png');">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col lg:flex-row gap-10 max-w-[800px] mx-auto items-center">
+        <!-- Image Grid -->
+        <div class="grid grid-cols-2 gap-4 w-full lg:w-1/2">
+          <div class="bg-[rgba(43,43,43,0.68)] rounded-xl shadow-lg overflow-hidden aspect-square">
+            <img src="./images/tiger1.png" alt="Tiger 1" class="object-cover w-full h-full" />
+          </div>
+          <div class="bg-[rgba(43,43,43,0.68)] rounded-xl shadow-lg overflow-hidden aspect-square">
+            <img src="./images/tiger2.png" alt="Tiger 2" class="object-cover w-full h-full" />
+          </div>
+          <div class="bg-[rgba(43,43,43,0.68)] rounded-xl shadow-lg overflow-hidden aspect-square">
+            <img src="./images/tiger3.png" alt="Tiger 3" class="object-cover w-full h-full" />
+          </div>
+          <div class="bg-[rgba(43,43,43,0.68)] rounded-xl shadow-lg overflow-hidden aspect-square">
+            <img src="./images/tiger4.png" alt="Tiger 4" class="object-cover w-full h-full" />
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="w-full  mb-14 lg:w-1/2 text-white">
+          <p class="mb-6">
+            Lorem ipsum dolor sit amet consectetur. Pharetra faucibus donec ultrices eros elit metus morbi aliquam quis.
+            Suspendisse
+            massa ullamcorper tortor morbi nisi leo. Ultrices leo vel tincidunt nunc eget elit.
+          </p>
+          <p class="mb-10">
+            Tellus rhoncus metus et eget mattis fringilla nec id. Amet ultrices quam ridiculus tellus. Leo
+            adipiscing tincidunt amet nisi semper adipiscing quam in est.
+          </p>
+
+          <button
+            class="px-6 py-3 rounded-xl text-white font-semibold border border-[rgba(234,145,18,1)] bg-[rgba(43,43,43,0.68)] hover:bg-gray-700/70 transition">
+            Connect Wallet
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section
+    style="background: linear-gradient(15deg,rgba(74, 74, 74, 1) 8%, rgba(59, 59, 59, 1) 14%, rgba(5, 5, 5, 1) 24%)"
+    class="bg-black py-12">
+    <div class="container mx-auto px-4 text-center text-white">
+      <h2 class="ml-6 sm:ml-0 text-2xl md:text-3xl font-bold">Top Collections</h2>
+      <p class="mt-4 text-gray-300 text-[12px] w-[324px] max-w-lg mx-auto">
+        The largest and unique Super rare NFT marketplace
+        For crypto-collectibles
+      </p>
+    </div>
+  </section>
+
+  <!-- Collections Section -->
+  <section class="bg-cover bg-center py-12" style="background-image: url('./images/bgEffectImage.png');">
+    <div class="container mx-auto px-4">
+      <div class="grid max-w-[800px] mx-auto grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Collection Cards -->
+        <div class="glass border border-[rgba(232,142,14,0.87)] rounded-xl p-4 shadow-lg text-white">
+          <p class="text-sm text-gray-300">Created by</p>
+          <p class="text-sm text-[rgba(232,142,14,0.87)] font-medium mb-3 flex font-clash gap-2 mt-1 "> <span
+              class="  bg-[rgba(217,217,217,1)] rounded-full w-[25px] h-[25px] inline-block "></span> <strong>James
+              Watson</strong></p>
+          <div class="w-[160px] h-[160px] mx-auto overflow-hidden rounded-full">
+            <img src="./images/cardImage1.png" alt="NFT 1" class="object-cover w-full h-full" />
+          </div>
+          <h3 class="mt-4 text-lg font-semibold">Nfts Collections</h3>
+          <p class="text-sm text-gray-400 mt-1">Created by <strong class="font-clash text-[rgba(232,142,14,0.87)]">James
+              Watson</strong></p>
+        </div>
+
+        <div class="glass border border-[rgba(232,142,14,0.87)] rounded-xl p-4 shadow-lg text-white">
+          <p class="text-sm text-gray-300">Created by</p>
+          <p class="text-sm text-[rgba(232,142,14,0.87)] font-medium mb-3 flex font-clash gap-2 mt-1 "> <span
+              class="  bg-[rgba(217,217,217,1)] rounded-full w-[25px] h-[25px] inline-block "></span> <strong>James
+              Watson</strong></p>
+          <div class="w-[160px] h-[160px]   mx-auto overflow-hidden rounded-full">
+            <img src="./images/cardImage2.png" alt="NFT 2" class="object-cover w-full h-full" />
+          </div>
+          <p class="mt-12 text-sm text-gray-400">Created by <strong
+              class="font-clash text-[rgba(232,142,14,0.87)]">James Watson</strong></p>
+        </div>
+
+        <div class="glass border border-[rgba(232,142,14,0.87)] rounded-xl p-4 shadow-lg text-white">
+          <p class="text-sm text-gray-300">Created by</p>
+          <p class="text-sm text-[rgba(232,142,14,0.87)] font-medium mb-3 flex font-clash gap-2 mt-1 "> <span
+              class="  bg-[rgba(217,217,217,1)] rounded-full w-[25px] h-[25px] inline-block "></span> <strong>James
+              Watson</strong></p>
+          <div class="w-[160px] h-[160px]  mx-auto overflow-hidden rounded-full">
+            <img src="./images/cardImage3.png" alt="NFT 3" class="object-cover w-full h-full" />
+          </div>
+          <p class="mt-12 text-sm text-gray-400">Created by <strong
+              class="font-clash text-[rgba(232,142,14,0.87)]">James Watson</strong>
+        </div>
+
+
+        <div class="glass border border-[rgba(232,142,14,0.87)] rounded-xl p-4 shadow-lg text-white">
+          <p class="text-sm text-gray-300">Created by</p>
+          <p class="text-sm text-[rgba(232,142,14,0.87)] font-medium mb-3 flex font-clash gap-2 mt-1 "> <span
+              class="  bg-[rgba(217,217,217,1)] rounded-full w-[25px] h-[25px] inline-block "></span> <strong>James
+              Watson</strong></p>
+          <div class="w-[160px] h-[160px]   mx-auto overflow-hidden rounded-full">
+            <img src="./images/cardImage4.png" alt="NFT 2" class="object-cover w-full h-full" />
+          </div>
+          <p class="mt-12 text-sm text-gray-400">Created by <strong
+              class="font-clash text-[rgba(232,142,14,0.87)]">James Watson</strong></p>
+        </div>
+
+        <div class="glass border border-[rgba(232,142,14,0.87)] rounded-xl p-4 shadow-lg text-white">
+          <p class="text-sm text-gray-300">Created by</p>
+          <p class="text-sm text-[rgba(232,142,14,0.87)] font-medium mb-3 flex font-clash gap-2 mt-1 "> <span
+              class="  bg-[rgba(217,217,217,1)] rounded-full w-[25px] h-[25px] inline-block "></span> <strong>James
+              Watson</strong></p>
+          <div class="w-[160px] h-[160px]  mx-auto overflow-hidden rounded-full">
+            <img src="./images/cardImage5.png" alt="NFT 3" class="object-cover w-full h-full" />
+          </div>
+          <p class="mt-12 text-sm text-gray-400">Created by <strong
+              class="font-clash text-[rgba(232,142,14,0.87)]">James Watson</strong>
+        </div>
+        <div class="glass border border-[rgba(232,142,14,0.87)] rounded-xl p-4 shadow-lg text-white">
+          <p class="text-sm text-gray-300">Created by</p>
+          <p class="text-sm text-[rgba(232,142,14,0.87)] font-medium mb-3 flex font-clash gap-2 mt-1 "> <span
+              class="  bg-[rgba(217,217,217,1)] rounded-full w-[25px] h-[25px] inline-block "></span> <strong>James
+              Watson</strong></p>
+          <div class="w-[160px] h-[160px] mx-auto overflow-hidden rounded-full">
+            <img src="./images/cardImage6.png" alt="NFT 1" class="object-cover w-full h-full" />
+          </div>
+          <h3 class="mt-4 text-lg font-semibold">Nfts Collections</h3>
+          <p class="text-sm text-gray-400 mt-1">Created by <strong class="font-clash text-[rgba(232,142,14,0.87)]">James
+              Watson</strong></p>
+        </div>
+
+      </div>
+
+      <!-- Explore Button -->
+      <div class="text-center mt-10">
+        <button
+          class="px-6 py-2 rounded-full border border-[rgba(234,145,18,1)] bg-[rgba(255,255,255,0.35)] text-white hover:bg-gray-700/70 transition">
+          Explore More
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top Creators Section -->
+  <section
+    style="background: linear-gradient(198deg,rgba(74, 74, 74, 1) 8%, rgba(59, 59, 59, 1) 14%, rgba(5, 5, 5, 1) 24%)"
+    class="bg-black py-12">
+    <div class="container mx-auto px-4 text-center text-white">
+      <h2 class="text-2xl md:text-4xl font-bold">Top Creators</h2>
+      <p class="mt-4 text-gray-300 max-w-lg mx-auto">
+        Checkout Top Rated Creators on the NFT Marketplace
+      </p>
+    </div>
+  </section>
+  <section
+    style="background: linear-gradient(30deg,rgba(74, 74, 74, 1) 8%, rgba(59, 59, 59, 1) 14%, rgba(5, 5, 5, 1) 34%)"
+    class="smCards bg-black ">
+    <div class="container mx-auto px-4 ">
+      <div class=" cards flex  items-center justify-center mx-auto max-w-[800px] flex-wrap gap-4">
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">1</p>
+          </div>
+          <img src="./images/smCard1.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">2</p>
+          </div>
+          <img src="./images/smCard2.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">3</p>
+          </div>
+          <img src="./images/smCard3.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">4</p>
+          </div>
+          <img src="./images/smCard4.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">5</p>
+          </div>
+          <img src="./images/smCard5.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">6</p>
+          </div>
+          <img src="./images/smCard6.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">7</p>
+          </div>
+          <img src="./images/smCard7.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+        <div
+          class="card1 relative bg-[rgba(230,220,186,0.2)] w-[184px] rounded-2xl h-[190px] flex flex-col gap-1 items-center justify-center ">
+          <div class="absolute mt-2  top-0 left-8 ">
+            <p class="text-[rgba(133,133,132,1)]  font-mono ">8</p>
+          </div>
+          <img src="./images/smCard8.png " class=" object-cover  w-[90px] mt-6 h-[90px] rounded-full" alt="">
+          <h4 class="font-work text-white text-[16px] font-semibold ">Name NFT</h4>
+          <p class="font-work text-[rgba(133,133,132,1)] text-[11px] mb-4 whitespace-pre-wrap  ">Total Sales: <span
+              class="font-mono text-white  ">34.53 ETH</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="py-1 max-w-full bg-black ">
+      <h4 class="text-white font-bold mt-10 mb-10 text-[25px] text-center"> RoadMap</h4>
+    </div>
+  </section>
+
+
+
+  <section class="bg-cover bg-bottom py-12" style="background-image: url('./images/bgEffectImage.png');">
+    <div class="container max-w-[800px]  mx-auto   px-4">
+      <div class="roadMapInnerContainer flex  flex-wrap sm:flex-nowrap mx-auto   items-center justify-between gap-12 ">
+        <div class="leftSection flex flex-col gap-12">
+          <!--  -->
+          <div class="rounded-lg   p-1"
+            style="background: linear-gradient(90deg, rgba(23, 21, 16, 1) 18%, rgba(23, 21, 15, 1) 35%, rgba(207, 152, 51, 1) 79%, rgba(238, 227, 188, 1) 89%);">
+            <div class="   md:max-w-[590px] bg-black border border-gray-300 rounded-lg p-4">
+              <p class="text-sm text-center font-clash text-gray-300 mb-1">January</p>
+              <h3 class="text-2xl font-bold text-white font-clash  mb-2">Brief</h3>
+              <p class="text-[14px] text-gray-400 ">Lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est
+                perferendis eveniet omnis. ipsum dolor sit amet...</p>
+            </div>
+          </div>
+          <!--  -->
+
+          <!--  -->
+          <div class="rounded-lg   p-1"
+            style="background: linear-gradient(90deg, rgba(23, 21, 16, 1) 18%, rgba(23, 21, 15, 1) 35%, rgba(207, 152, 51, 1) 79%, rgba(238, 227, 188, 1) 89%);">
+            <div class=" bg-black border border-gray-300 rounded-lg p-4">
+              <p class="text-sm text-center text-gray-300 mb-1">January</p>
+              <h3 class="text-2xl font-bold text-white mb-2">Brief</h3>
+              <p class="text-[14px] text-gray-400 ">Lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est
+                perferendis eveniet omnis. ipsum dolor sit amet...</p>
+            </div>
+          </div>
+          <!--  -->
+          <!--  -->
+          <div class="rounded-lg   p-1"
+            style="background: linear-gradient(90deg, rgba(23, 21, 16, 1) 18%, rgba(23, 21, 15, 1) 35%, rgba(207, 152, 51, 1) 79%, rgba(238, 227, 188, 1) 89%);">
+            <div class="bg-black  border border-gray-300 rounded-lg p-4">
+              <p class="text-sm text-center text-gray-300 mb-1">January</p>
+              <h3 class="text-2xl font-bold text-white mb-2">Brief</h3>
+              <p class="text-[14px] text-gray-400 ">Lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est
+                perferendis eveniet omnis. ipsum dolor sit amet...</p>
+            </div>
+          </div>
+          <!--  -->
+        </div>
+        <div class="rightSection flex flex-col mt-16 gap-[50px]">
+          <div class="rounded-lg   p-1"
+            style="background: linear-gradient(290deg, rgba(23, 21, 16, 1) 18%, rgba(23, 21, 15, 1) 35%, rgba(207, 152, 51, 1) 79%, rgba(238, 227, 188, 1) 89%);">
+            <div class="  bg-black md:max-w-[590px] border  border-gray-300 rounded-lg p-4">
+              <p class="text-sm text-center text-gray-300 mb-1">January</p>
+              <h3 class="text-2xl font-bold text-white mb-2">Brief</h3>
+              <p class="text-[14px] text-gray-400 ">Lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est
+                perferendis eveniet omnis. ipsum dolor sit amet...</p>
+            </div>
+          </div>
+          <!--  -->
+          <div class="rounded-lg   p-1"
+            style="background: linear-gradient(290deg, rgba(23, 21, 16, 1) 18%, rgba(23, 21, 15, 1) 35%, rgba(207, 152, 51, 1) 79%, rgba(238, 227, 188, 1) 89%);">
+            <div class=" bg-black border border-gray-300 rounded-lg p-4">
+              <p class="text-sm text-center text-gray-300 mb-1">January</p>
+              <h3 class="text-2xl font-bold text-white mb-2">Brief</h3>
+              <p class="text-[14px] text-gray-400 ">Lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est
+                perferendis eveniet omnis. ipsum dolor sit amet...</p>
+            </div>
+          </div>
+          <!--  -->
+          <div class="rounded-lg   p-1"
+            style="background: linear-gradient(290deg, rgba(23, 21, 16, 1) 18%, rgba(23, 21, 15, 1) 35%, rgba(207, 152, 51, 1) 79%, rgba(238, 227, 188, 1) 89%);">
+            <div class=" bg-black border border-gray-300 rounded-lg p-4">
+              <p class="text-sm text-center text-gray-300 mb-1">January</p>
+              <h3 class="text-2xl font-bold text-white mb-2">Brief</h3>
+              <p class="text-[14px] text-gray-400 ">Lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est
+                perferendis eveniet omnis. ipsum dolor sit amet...</p>
+            </div>
+          </div>
+          <!--  -->
+        </div>
+        <!-- <div class="leftSection"></div> -->
+      </div>
+    </div>
+  </section>
+    <section
+      style="background: linear-gradient(198deg,rgba(74, 74, 74, 1) 8%, rgba(59, 59, 59, 1) 14%, rgba(5, 5, 5, 1) 24%)"
+      class="bg-black py-12">
+      <div class="container mx-auto px-4 text-center text-white">
+        <h2 class="text-2xl md:text-4xl font-bold">How it Works</h2>
+      </div>
+    </section>
+  <section style="background: linear-gradient(29deg,rgba(219, 219, 219, 1) 0%, rgba(109, 109, 109, 1) 0%, rgba(5, 5, 5, 1) 24%);" class="coins bg-black">
+    <div
+      class="mb-a10 flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md ps-6 gap-1 md:gap-20  sm:px-6  max-w-[800px] mx-auto mts-6 md:px-1s4">
+      <!-- Section Heading -->
+      <!-- <h1 data-aos="fade-right" class="text-[18px] ml-6 md:ml-0 md:text-3xl md:pl-5 font-bold text-left  mb-3">
+        Traditions of Saudi Arabia
+      </h1> -->
+
+      <!-- Content Row -->
+      <!-- Image Column -->
+      <div data-aos="fade-right" class="w-full  md:w-[1440px]  ">
+        <img src="./images/walletCoin.png" alt="Card Image" class="rounded-lg w-[full]   object-cover">
+      </div>
+
+      <!-- Text Column -->
+      <div data-aos="fade-left"
+        class="text-white w-full md:w-[922px] flex flex-col justify-center items-start text-left">
+        <img src="./images/wide.png" class="object-cover w-[55px] mb-4 " alt="">
+        <h2 class="text-2xl lg:text-2xl font-bold mb-6">Setup and Connect <br> your Wallet.</h2>
+        <p class="text-[9px]  max-w-[300px]  lg:texst-base leading-relaxed">
+          Lorem ipsum dolor sit amet consectetur. Donec vitae pellentesque nunc ut sit a volutpat elementum. Nunc elit
+          nisi
+          pellentesque porta elementum. Id mattis neque diam nulla. Amet et a felis pellentesque sed odio.
+        </p>
+      </div>
+      <!-- <div
+        class="flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md ps-6 gap-1 md:gap-20">
+
+
+      </div> -->
+    </div>
+  </section>
+
+
+  <section class="coins bg-black">
+    <div
+      class="mb-a10 flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md ps-6 gap-1 md:gap-20  sm:px-6  max-w-[800px] mx-auto pt-6 md:px-1s4">
+      <!-- Section Heading -->
+      <!-- <h1 data-aos="fade-right" class="text-[18px] ml-6 md:ml-0 md:text-3xl md:pl-5 font-bold text-left  mb-3">
+          Traditions of Saudi Arabia
+        </h1> -->
+
+      <!-- Content Row -->
+      <!-- Image Column -->
+
+      <!-- Text Column -->
+      <div data-aos="fade-left"
+        class="text-white w-full md:w-[922px] flex flex-col justify-center items-start text-left">
+        <!-- <img src="./images/wide.png" class="object-cover w-[55px] mb-4 " alt=""> -->
+        <h2 class="text-2xl lg:text-4xl font-bold mb-6">Create your Own Digital NFT</h2>
+        <p class="text-[9px]  max-w-[300px]  lg:texst-base leading-relaxed">
+          Lorem ipsum dolor sit amet consectetur. Donec vitae pellentesque nunc ut sit a volutpat elementum. Nunc elit
+          nisi
+          pellentesque porta elementum. Id mattis neque diam nulla. Amet et a felis pellentesque sed odio.
+        </p>
+      </div>
+
+      <div data-aos="fade-right" class="w-full rounded-[20%] bg-[rgba(217,217,217,0.06)] md:w-[750px]  ">
+        <img src="./images/monkeyNFT.png" alt="Card Image" class="rounded-lg w-[full]   object-cover">
+      </div>
+      <!-- <div
+          class="flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md ps-6 gap-1 md:gap-20">
+  
+  
+        </div> -->
+    </div>
+  </section>
+
+  <section class="coins bg-black">
+    <div
+      class="mb-a10 flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md ps-6 gap-1 md:gap-20  sm:px-6  max-w-[800px] mx-auto mts-6 md:px-1s4">
+      <!-- Section Heading -->
+      <!-- <h1 data-aos="fade-right" class="text-[18px] ml-6 md:ml-0 md:text-3xl md:pl-5 font-bold text-left  mb-3">
+          Traditions of Saudi Arabia
+        </h1> -->
+
+      <!-- Content Row -->
+      <!-- Image Column -->
+      <div data-aos="fade-right" class="w-full  md:w-[1440px]  ">
+        <img src="./images/wide.png" class="object-cover  mr-[102px] mt-6  float-end w-[55px] mb-6 " alt="">
+        <img src="./images/dollarNft.png" alt="Card Image" class="rounded-lg w-[1440px]    object-cover">
+      </div>
+
+      <!-- Text Column -->
+      <div data-aos="fade-left"
+        class="text-white w-full md:w-[922px] flex flex-col justify-center items-start text-left">
+        <h2 class="text-2xl lg:text-2xl font-bold mb-6">Setup and Connect <br> your Wallet.</h2>
+        <p class="text-[9px]  max-w-[300px]  lg:texst-base leading-relaxed">
+          Lorem ipsum dolor sit amet consectetur. Donec vitae pellentesque nunc ut sit a volutpat elementum. Nunc elit
+          nisi
+          pellentesque porta elementum. Id mattis neque diam nulla. Amet et a felis pellentesque sed odio.
+        </p>
+      </div>
+      <!-- <div
+          class="flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md ps-6 gap-1 md:gap-20">
+  
+  
+        </div> -->
+    </div>
+  </section>
+
+  <footer class="bg-cover bg-center text-white py-16 px-4" style="background-image: url('./images/bgEffectImage.png');">
+    <div class="max-w-[800px] mx-auto text-center">
+
+      <!-- Heading -->
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Join Our<span class="text-white">Community</span></h2>
+
+      <!-- Paragraph -->
+      <p class="text-ssm  text-[10px] mx-auto max-w-[516px]  font-poppins text-gray-300 my-8">
+        Lorem ipsum dolor sit amet consectetur. Donec vitae pellentesque nunc ut sit a volutpat elementum. Nunc elit
+        nisi
+        pellentesque porta elementum. Id mattis neque diam nulla. Amet et a felis pellentesque sed odio.
+      </p>
+
+      <!-- Input + Button Row -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <input type="email" placeholder="Your Email"
+          class="px-6 py-3 rounded-full w-full sm:w-[400px] text-black focus:outline-none" />
+        <button
+          class="px-6 py-3 bg-[rgba(230,220,186,0.6)] text-white font-semibold rounded-full border border-[rgba(234,145,18,1)] transition">
+          Join Now
+        </button>
+      </div>
+
+      <!-- Footer Note -->
+      <p class="text-xs text-gray-400 mt-10">© NFT Market. Use this template freely.</p>
+    </div>
+  </footer>
+
+
+
+
+
+  <!-- <section class="smCards bg-bsack ">
+    <div class="container mx-auto px-4 ">
+      <div style="background-image: url('./images/heroImage.png'); "
+        class=" w-sfull h-full  cards bg-pink-600 flsex items-center justify-center mx-auto w-[800px] flex-wrap gap-4">
+      </div>
+    </div>
+  </section> -->
+
+  <!-- <div class="h-96 w-20 mx-auto relative">
+    <div class="w-2 h-full bg-pink-400"></div>
+    <div class="absolute w-5 h-5 rounded-full bg-green-500 top-1 right-[66px]"></div>
+  </div> -->
+  <!-- <div class="w-64 h-40 rounded-4xl bg-amber-300 p-2">
+    <div class="w-full h-full bg-white p-2">
+      <div class="w-full h-full bg-white border border-solid border-black rounded-4xl"></div>
+    </div>
+  </div> -->
+</body>
+
+</html>

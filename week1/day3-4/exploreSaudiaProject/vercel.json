@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "public": true,
+  "builds": [
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "images/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "cleanUrls": true
+}

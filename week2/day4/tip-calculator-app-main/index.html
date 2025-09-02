@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tip Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#C5E4E7] font-mono">
+  <div class="min-h-screen flex flex-col justify-center items-center p-4">
+    <img src="./images/logo.svg" class="my-5" alt="">
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row gap-6 w-full max-w-4xl">
+      <!-- Left Form Section -->
+      <form class="flex-1">
+        <label class="block text-gray-600 text-sm mb-1">Bill</label>
+        <input type="number" placeholder="0" id="bill"
+          class="w-full bg-gray-100 text-right text-2xl font-bold p-3 rounded-md mb-6 outline-none focus:ring-2 focus:ring-[#26C2AE]" />
+
+        <label class="block text-gray-600 text-sm mb-2">Select Tip %</label>
+        <div class="flex flex-wrap gap-4 mb-6">
+          <div class="flex-1 min-w-[30%]">
+            <button type="button" id="tip5" 
+              class="w-full bg-[#00474B] text-white text-xl font-bold py-2 rounded-md hover:bg-[#26C2AE]">5%</button>
+          </div>
+          <div class="flex-1 min-w-[30%]">
+            <button type="button" id="tip10" 
+              class="w-full bg-[#00474B] text-white text-xl font-bold py-2 rounded-md hover:bg-[#26C2AE]">10%</button>
+          </div>
+          <div class="flex-1 min-w-[30%]">
+            <button type="button" id="tip15"   class="w-full bg-[#26C2AE] text-white text-xl font-bold py-2 rounded-md">15%</button>
+          </div>
+          <div class="flex-1 min-w-[30%]">
+            <button type="button" id="tip25" 
+              class="w-full bg-[#00474B] text-white text-xl font-bold py-2 rounded-md hover:bg-[#26C2AE]">25%</button>
+          </div>
+          <div class="flex-1 min-w-[30%]">
+            <button type="button" id="tip50" 
+              class="w-full bg-[#00474B] text-white text-xl font-bold py-2 rounded-md hover:bg-[#26C2AE]">50%</button>
+          </div>
+          <div class="flex-1 min-w-[30%]">
+            <input type="number"  id="custom" placeholder="Custom"
+              class="w-full bg-gray-100 text-right text-xl font-bold p-2 rounded-md outline-none focus:ring-2 focus:ring-[#26C2AE]" />
+          </div>
+        </div>
+
+        <label class="block text-gray-600 text-sm mb-1">Number of People</label>
+        <input type="number" placeholder="0" id="numberOfPeople"
+          class="w-full bg-gray-100 text-right text-2xl font-bold p-3 rounded-md outline-none focus:ring-2 focus:ring-[#26C2AE]" />
+      </form>
+
+      <!-- Right Result Section -->
+      <div class="flex-1 bg-[#00474B] text-white rounded-xl p-8 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <p class="text-sm">Tip Amount</p>
+              <p class="text-xs text-gray-400">/per person</p>
+            </div>
+            <p id="tipAmount" class="text-3xl text-[#26C2AE] font-bold">$4.27</p>
+          </div>
+
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <p class="text-sm">Total</p>
+              <p class="text-xs text-gray-400">/per person</p>
+            </div>
+            <p id="totalAmount" class="text-3xl text-[#26C2AE] font-bold">$32.79</p>
+          </div>
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <p class="text-sm">Total Bill</p>
+              <!-- <p class="text-xs text-gray-400">/per person</p> -->
+            </div>
+            <p id="totalBill" class="text-3xl text-[#26C2AE] font-bold">$132.79</p>
+          </div>
+        </div>
+
+        <button id="resetBtn" class="bg-[#26C2AE] w-full py-3 mt-4 text-[#00474B] font-bold uppercase rounded-md hover:bg-[#9FE8DF]">
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+  <script src="./script.js"></script>
+</body>
+
+</html>

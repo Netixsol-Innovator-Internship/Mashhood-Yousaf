@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select a Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (!isLoggedIn || isLoggedIn !== 'true') {
+        alert('You must be logged in to access this page.');
+        window.location.href = '../signIn.html'; // Redirect to login page
+      }
+    });
+  </script>
+</head>
+
+<body class="bg-white text-gray-800 px-6 mb-4 pys-8 font-sans">
+  <!-- Navbar -->
+  <header class="bg-white max-w-[92%] mx-auto border-b mb-4 border-gray-200">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-4 font-semibold text-gray-800 text-xl">
+        <img src="./images/miniLogo.png" alt="Logo" class="w-4 object-contain" />
+        <p>QuizMaster</p>
+      </div>
+
+      <!-- Hamburger button (hidden on lg and above) -->
+      <button id="hamburgerBtn" aria-label="Toggle Menu"
+        class="md:hidden text-gray-600 hover:text-blue-500 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+
+
+      <!-- Right Icons: Bell + Avatar (hidden on md and below) -->
+      <div id="rightIcons" class="hidden md:flex items-center gap-6">
+        <!-- Navigation links + icons -->
+        <nav id="navMenu" class="hidden md:flex md:items-center md:space-x-6 text-gray-700">
+          <a href="./index.html" class="hover:text-blue-500 block md:inline">Home</a>
+          <a href="./selectQuiz.html" class="hover:text-blue-500 block md:inline">Quizzes</a>
+          <a href="#" class="hover:text-blue-500 block md:inline">Leaderboard</a>
+          <a href="./profile.html" class="hover:text-blue-500 block md:inline">Profile</a>
+        </nav>
+        <button aria-label="Notifications" class="text-gray-600 hover:text-blue-500 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </button>
+
+        <img src="./images/dp.png" alt="User Avatar" class="rounded-full w-9 h-9 object-cover" />
+      </div>
+    </div>
+
+    <!-- Mobile menu (hidden by default) -->
+    <nav id="mobileMenu" class="md:hidden hidden bg-white border-t border-gray-200 p-4 space-y-4">
+      <a href="./index.html" class="block text-gray-700 hover:text-blue-500">Home</a>
+      <a href="./selectQuiz.html" class="block text-gray-700 hover:text-blue-500">Quizzes</a>
+      <a href="#" class="block text-gray-700 hover:text-blue-500">Leaderboard</a>
+      <a href="./profile.html" class="block text-gray-700 hover:text-blue-500">Profile</a>
+
+      <div class="flex items-center gap-6 mt-2">
+
+        <button aria-label="Notifications" class="text-gray-600 hover:text-blue-500 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </button>
+
+        <img src="./images/dp.png" alt="User Avatar" class="rounded-full w-9 h-9 object-cover" />
+      </div>
+    </nav>
+  </header>
+
+
+  <div class="container max-w-[80%] mx-auto ">
+    <!-- Header -->
+    <h1 class="text-3xl font-semibold my-6">Select a Quiz</h1>
+
+    <!-- Filter Buttons -->
+    <div class="flex flex-wrap gap-3 mb-10">
+      <button class="px-5 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm">All</button>
+      <button class="px-5 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm">Science</button>
+      <button class="px-5 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm">History</button>
+      <button class="px-5 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm">Literature</button>
+      <button class="px-5 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm">Mathematics</button>
+    </div>
+
+    <!-- Featured Quizzes -->
+    <!-- <section class="mb-12">
+      <h2 class="text-xl font-medium mb-4">Featured Quizzes</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        Featured Item
+        <div class="bg-white -hidden">
+          <img src="./images/universe.png" alt="Universe" class="w-full rounded h-36 object-cover">
+          <div class="pt-4">
+            <h3 class="text-lg font-semibold mb-1">The Universe</h3>
+            <p class="text-sm text-gray-600">Test your knowledge about the cosmos.</p>
+          </div>
+        </div>
+
+        <div class="bg-white-hidden">
+          <img src="./images/ancient.png" alt="Ancient" class="w-full rounded h-36 object-cover">
+          <div class="pt-4">
+            <h3 class="text-lg font-semibold mb-1">Ancient Civilizations</h3>
+            <p class="text-sm text-gray-600">Explore the mysteries of ancient cultures.</p>
+          </div>
+        </div>
+
+        <div class="bg-white -hidden">
+          <img src="./images/shakespear.png" alt="Shakespeare" class="w-full rounded h-36 object-cover">
+          <div class="pt-4">
+            <h3 class="text-lg font-semibold mb-1">Shakespearean Plays</h3>
+            <p class="text-sm text-gray-600">Dive into the world of the Bard.</p>
+          </div>
+        </div>
+      </div>
+    </section> -->
+
+
+    <!-- Featured Quizzes -->
+    <section class="mb-12">
+      <h2 class="text-xl font-medium mb-4">Featured Quizzes</h2>
+      <div id="featured-quizzes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- All Quizzes -->
+    <!-- <section class="">
+      <h2 class="text-xl font-medium mb-4">All Quizzes</h2>
+
+      Quiz Item
+      <div class="flex flex-col md:flex-row   items-centesr justify-between bg-white rounded-lg mb-5 pss-5">
+        <div class="md:w-2/3 mb-4 md:mb-0 md:mr-6">
+          <h3 class="text-lg font-semibold mb-1">General Knowledge</h3>
+          <p class="text-sm text-gray-600">Test your overall knowledge with a mix of questions.</p>
+        </div>
+        <img src="./images/gk.png" alt="General" class="w-[18rem] h-36  object-cover rounded-md" />
+      </div>
+
+      <div class="flex flex-col md:flex-row items-censter justify-between bg-white rounded-lg mb-5 pss-5">
+        <div class="md:w-2/3 mb-4 md:mb-0 md:mr-6">
+          <h3 class="text-lg font-semibold mb-1">Science</h3>
+          <p class="text-sm text-gray-600">Explore the wonders of science from biology to physics.</p>
+        </div>
+        <img src="./images/cs.png" alt="Science" class="w-[18rem] h-36 object-cover rounded-md" />
+      </div>
+
+      <div class="flex flex-col md:flex-row items-centers justify-between bg-white rounded-lg mb-5 pss-5">
+        <div class="md:w-2/3 mb-4 md:mb-0 md:mr-6">
+          <h3 class="text-lg font-semibold mb-1">History</h3>
+          <p class="text-sm text-gray-600">Journey through time and learn about historical events.</p>
+        </div>
+        <img src="./images/js.png" alt="History" class="w-[18rem] h-36  object-cover rounded-md" />
+      </div>
+      <div class="flex flex-col md:flex-row items-centers justify-between bg-white rounded-lg mb-5 pss-5">
+        <div class="md:w-2/3 mb-4 md:mb-0 md:mr-6">
+          <h3 class="text-lg font-semibold mb-1">History</h3>
+          <p class="text-sm text-gray-600">Journey through time and learn about historical events.</p>
+        </div>
+        <img src="./images/exp.png" alt="History" class="w-[18rem] h-36  object-cover rounded-md" />
+      </div>
+      <div class="flex flex-col md:flex-row items-centers justify-between bg-white rounded-lg mb-5 pss-5">
+        <div class="md:w-2/3 mb-4 md:mb-0 md:mr-6">
+          <h3 class="text-lg font-semibold mb-1">History</h3>
+          <p class="text-sm text-gray-600">Journey through time and learn about historical events.</p>
+        </div>
+        <img src="./images/js.png" alt="History" class="w-[18rem] h-36  object-cover rounded-md" />
+      </div>
+    </section> -->
+
+    <!-- All Quizzes -->
+    <section>
+      <h2 class="text-xl font-medium mb-4">All Quizzes</h2>
+      <div id="all-quizzes"></div>
+    </section>
+  </div>
+  <script>
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburgerBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+  <script src="./js/selectQuiz.js"></script>
+</body>
+
+</html>

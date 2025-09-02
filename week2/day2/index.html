@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'spin-slow': 'spin 3s linear infinite',
+            'bounce-slow': 'bounce 2s infinite',
+            'pulse-slow': 'pulse 3s infinite',
+            'fade-in': 'fadeIn 1s ease-in-out',
+            'slide-in': 'slideIn 1s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideIn: {
+              '0%': { transform: 'translateX(-100%)' },
+              '100%': { transform: 'translateX(0)' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+
+<body class="bg-gray-100 ">
+  <!-- Modal -->
+  <!-- https://medium.com/@mimranisrar6/creating-a-custom-confirmation-dialog-for-an-anchor-tag-4223514a7b0f -->
+  <div id="inputModal" class="fixed hidden inset-0 flex items-center justify-center z-50 backdrop-blur confirm-dialog ">
+    <div class="relative px-4 min-h-screen md:flex md:items-center md:justify-center">
+      <div class=" opacity-25 w-full h-full absolute z-10 inset-0"></div>
+      <div
+        class="bg-white rounded-lg md:max-w-md md:mx-auto p-4 fixed inset-x-0 bottom-0 z-50 mb-4 mx-4 md:relative shadow-lg">
+        <!-- content -->
+        <div class="md:flex items-center">
+          <!-- <div
+            class="rounded-full border border-gray-300 flex items-center justify-center w-16 h-16 flex-shrink-0 mx-auto">
+            <i class="bx bx-error text-3xl">
+              &#9888;
+            </i>
+          </div> -->
+          <form onsubmit="handleSubmit(event)">
+            <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
+              <input id="userName" type="text" placeholder="Your Name"
+                class="w-full md:w-[20rem] px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required />
+
+              <textarea id="userMsg" placeholder="Your Message" rows="4"
+                class="w-full md:w-[20rem] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required></textarea>
+            </div>
+
+        </div>
+        <!-- content -->
+        <div class="text-center md:text-right mt-4 md:flex md:justify-end">
+          <button id="confirm-delete-btn"
+            class="block animate-bounce w-full md:inline-block md:w-auto px-4 py-3 md:py-2 bg-green-200 text-green-700 rounded-lg font-semibold text-sm md:ml-2 md:order-2">
+            Add
+          </button>
+        </div>
+        </form>
+        <button id="closeModal"
+          class="block w-full md:inline-block md:w-auto px-4 py-3 md:py-2 bg-gray-200 rounded-lg font-semibold text-sm mt-4 md:mt-0 md:order-1">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <header class="flex items-center mb-12 max-w-[40rem] mx-auto ">
+    <div class="fixed top-0    ">
+      <button id="addNotificationModal" class="bg-blue-800 text-white text-sm px-3 py-1 rounded-md">Add
+        Notification</button>
+    </div>
+  </header>
+  <main class="min-h-screen flex items-center justify-center mt-s6">
+
+
+    <div class="bg-white rounded-lg shadow-sm max-w-[40rem] mx-auto w-full p-6">
+      <div class="flex items-center justify-between  mb-6">
+        <h1 class=" text-sm sm:text-xl font-bold">Notifications <button id="notification"
+            class="bg-blue-800 text-white text-sm  cursor-pointer animate-bounce-slow transition delay-150 duration-300 ease-in-out px-2 sm:px-3 py-1 rounded-md">3</button>
+        </h1>
+        <p id="markAsReadBtn" class="text-gray-600  cursor-pointer text-[12px] sm:text-[14px] ">Mark all as read</p>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Dynamic Msg -->
+        <div  id="msgBox"></div>
+
+        <!-- Dynamic Msg -->
+        <!-- Notification 1 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-mark-webber.webp" alt="Mark Webber" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Mark Webber</span> reacted to your recent post <span
+                class="font-bold text-gray-700">My first tournament today!</span>
+              <span class="block w-2 h-2 bg-red-500 rounded-full inline-block ml-1"></span>
+            </p>
+            <p class="text-gray-500 text-[13px]">1m ago</p>
+          </div>
+        </div>
+
+
+        <!-- Notification 2 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-angela-gray.webp" alt="Angela Gray" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Angela Gray</span> followed you
+              <span class="block w-2 h-2 bg-red-500 rounded-full inline-block ml-1"></span>
+            </p>
+            <p class="text-gray-500 text-sm">5m ago</p>
+          </div>
+        </div>
+
+
+        <!-- Notification 3 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-jacob-thompson.webp" alt="Jacob Thompson" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Jacob Thompson</span> has joined your group <span
+                class="font-bold text-blue-800">Chess Club</span>
+              <span class="block w-2 h-2 bg-red-500 rounded-full inline-block ml-1"></span>
+            </p>
+            <p class="text-gray-500 text-sm">1 day ago</p>
+          </div>
+        </div>
+
+
+        <!-- Notification 4 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-rizky-hasanuddin.webp" alt="Rizky Hasanuddin" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Ricky Hasanuddin</span> sent you a private message
+            </p>
+            <p class="text-gray-500 text-sm">5 days ago</p>
+            <div class="mt-3 p-4 border bg-white  border-gray-200 rounded-lg text-sm">
+              Hello, thanks for setting up the Chess Club. I've been a member for a few weeks now and I'm already having
+              lots of fun and improving my game.
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Notification 5 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-kimberly-smith.webp" alt="Kimberly Smith" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Kimberly Smith</span> commented on your picture
+            </p>
+            <p class="text-gray-500 text-sm">1 week ago</p>
+          </div>
+        </div>
+
+
+        <!-- Notification 6 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-nathan-peterson.webp" alt="Nathan Peterson" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Nathan Peterson</span> reacted to your recent post <span
+                class="font-bold text-gray-700">5 end-game strategies to increase your win rate</span>
+            </p>
+            <p class="text-gray-500 text-sm">2 weeks ago</p>
+          </div>
+        </div>
+
+
+        <!-- Notification 7 -->
+        <div class="flex animate-slide-in gap-3 p-3 bg-blue-50 rounded-lg">
+          <img src="./assets/images/avatar-anna-kim.webp" alt="Anna Kim" class="w-10 h-10 rounded-full">
+          <div class="flex-1">
+            <p class="text-sm">
+              <span class="font-bold">Anna Kim</span> left the group <span class="font-bold text-blue-800">Chess
+                Club</span>
+            </p>
+            <p class="text-gray-500 text-sm">2 weeks ago</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <script src="./script.js"></script>
+</body>
+
+</html>

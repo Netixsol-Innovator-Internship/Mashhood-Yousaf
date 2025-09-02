@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Imperial+Script&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- <link rel="stylesheet" href="./dist/output.css"> -->
+  <style>
+    l body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+
+<body class=" overflow-x-hidden">
+  <div id="page" 
+    class="container bg-black text-white min-h-screen transition-colors duration-500 mx-auto ">
+
+    <div style="background-image: url('./images/aboutUs.jpg');"
+      class=" h-[30rem]  sm:h-[30rem]   w-full lg:h-[40rem] bg-[url('/week1/day3-4/exploreSaudiaProject/images/aboutUs.jpg')] bg-cover bg-center  bg-no-repeat">
+      <section class="landingPage">
+
+        <header class="flex items-center pt-4 md:pt-0  justify-between  text-white">
+
+          <!-- Logo on the left -->
+          <div  data-aos="fade-left" class="logo h-15 md:h-25 w-30 mt-[25px] ml-[29px]  md:ml-[60px] lg:ml-[91px]">
+            <img src="./images/logo.png" alt="logo" class="h-full w-auto" />
+          </div>
+
+          <!-- Links & toggle button on the right -->
+          <nav  data-aos="fade-right" class="flex items-center  mt-[12px]  mr-[40px] md:mr-[120px] gap-10">
+            <button id="menuToggssle"
+              class="block md:hidden text-white border border-white px-2 py-1 rounded text-[18px]">
+              <span id="menuIcon">☰</span>
+            </button>
+            <!-- Toggle Switch (fits inside your #menuLinks) -->
+            <div id="menuLinks" class="hidden md:flex md:mr-[-15px] gap-6 items-center">
+
+              <!-- Theme Toggle Button -->
+              <button id="themeToggle"
+                class="relative w-[60px] h-[30px] rounded-full bg-white flex items-center p-[2px] transition-all duration-300">
+                <!-- Moon -->
+                <div id="moonIcon"
+                  class="w-[26px] h-[26px] rounded-full flex items-center justify-center text-gray-600 z-10">
+                  <img src="./images/moon.png" alt="">
+                </div>
+
+                <!-- Sun Highlight Circle -->
+                <div id="sunCircle"
+                  class="absolute right-[2px] w-[29px] h-[26px] bg-black rounded-full flex items-center justify-center transition-all duration-300">
+                  <img src="./images/sun.png" alt="">
+                </div>
+              </button>
+
+              <!-- Other Links -->
+              <a href="./destination.html" class="hover:underline font-medium text-[15px]">Destinations</a>
+              <a href="./aboutUs.html" class="hover:underline font-medium text-[15px]">Members</a>
+              <a href="./gridCard.html" class="hover:underline font-medium text-[15px]">Gallery</a>
+            </div>
+
+          </nav>
+
+        </header>
+        <!-- centered hero text -->
+        <div  data-aos="fade-down"
+          class=" mt-[2.7rem] sm:mt-10 md:mt-3 lg:mt-19  md:mb-[1px]  flex bg-blsck items-center justify-center text-white">
+          <div class="aboutUs mt-[62px] sm:mt-[42px] md:mt-[82px] w-[652px] h-[228px]  ">
+            <h1 class=" text-[35px] sm:text-[50px]  md:text-6xl font-black  text-center leading-[115.99%]">
+              <b>About Us</b>
+            </h1>
+            <div class="subText w-[250px] sm:w-[300px] md:w-[426px] mt-[9px] sm:mt-[5px] h-[46px] mx-auto">
+              <p class="text-center font-normal text-[10px]  md:text-[14px] leading-[115.999%]">
+                Discover the country's hidden gems and breathtaking landscapes.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- history text sm:mb-6 md:mb-0 -->
+
+      </section>
+    </div>
+    <!-- logos Section -->
+    <section class="logosSection">
+      <div class="relative mainDiv  text-white py-8">
+        <!-- Main Overlay -->
+        <!-- <div class="absolute inset-0 bg-black/30 z-0"></div> -->
+        <!-- Top Gradient Shadow -->
+        <!-- <div
+          class="pointer-events-none absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-black/90 to-transparent z-10">
+        </div> -->
+        <!-- Bottom Gradient Shadow -->
+        <!-- <div
+          class="pointer-events-none absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/90 to-transparent z-10">
+        </div> -->
+
+        <!-- SubDivs for logos -->
+        <div id="saudiText" class="text-center">
+          <h3 class="font-bold text-[19px]  md:text-[30px] ">Saudi, a kingdom that inspires</h3>
+          <h3 class=" text-[11px] mt-1 md:text-[15px] ">A uniquely Saudi experience awaits in winter</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- traditions section -->
+
+    <!-- Row 2: Traditions Section -->
+    <div class="mb-10 sm:px-6  mt-6 md:px-14">
+      <!-- Section Heading -->
+      <h1   data-aos="fade-right" class="text-[18px] ml-6 md:ml-0 md:text-3xl md:pl-5 font-bold text-left  mb-3">
+        Traditions of Saudi Arabia
+      </h1>
+
+      <!-- Content Row -->
+      <div
+        class="flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md p-6 gap-8 md:gap-20">
+
+        <!-- Image Column -->
+        <div  data-aos="fade-right" class="w-full md:w-[30rem] lg:w-1/2 ">
+          <img src="./images/languageSectionPic.jpg" alt="Card Image" class="rounded-lg w-full object-cover">
+        </div>
+
+        <!-- Text Column -->
+        <div  data-aos="fade-left" class="text-white w-full md:w-1/2 flex flex-col justify-center items-start text-left">
+          <h2 class="text-2xl lg:text-3xl font-semibold mb-3">Language</h2>
+          <p class="text-sm  lg:text-base leading-relaxed">
+            Arabic is the official language of Saudi Arabia and the primary language used in all dealings and public
+            transactions.
+            English serves as an informal second language in the Kingdom and is spoken by a large section of its
+            society.
+            All road
+            signs are bilingual, showing information in both Arabic and English.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- traditions section -->
+
+    <div class="mb-10 sm:px-6  mt-6 md:px-14">
+
+      <!-- Content Row -->
+      <div
+        class="flex flex-col md:flex-row items-center justify-between bg-black rounded-lg shadow-md p-6 gap-8 md:gap-20">
+
+        <!-- Text Column -->
+        <div  data-aos="fade-right" class="text-white w-full md:w-1/2 flex flex-col justify-center items-start text-left">
+          <h2 class="text-2xl lg:text-3xl font-semibold mb-3">Culture</h2>
+          <p class="text-sm lg:text-base leading-relaxed">
+            Saudi Arabia’s rich heritage and traditions have been shaped by its position as a historic trade hub and the
+            birthplace
+            of Islam. In recent years, the Kingdom has undergone a significant cultural transformation, evolving
+            centuy-old customs
+            to fit the contemporary world we live in today.
+          </p>
+        </div>
+        <!-- Image Column -->
+        <div  data-aos="fade-left" class="w-full md:w-[30rem] lg:w-1/2 ">
+          <img src="./images//cultureManPic.jpg" alt="Card Image" class="rounded-lg w-full bg-center object-cover">
+        </div>
+
+      </div>
+    </div>
+    <!-- pill buton -->
+    <!-- Button-like Container -->
+    <!-- <div class="w-full  sm:max-w-[1100px] sm:mx-auto my-1 px-6 md:px-10 py-6 md:py-10 rounded-full shadow-md 
+              flex flex-col md:flex-row items-center justify-between 
+              bg-gradient-to-b from-[#047Fs01] via-[#047F01] to-white to-140% space-y-3 md:space-y-0"> -->
+    <div
+      class="w-full sm:max-w-[1100px] sm:mx-auto my-1 px-6 md:px-10 py-6 md:py-10 rounded-full shadow-md 
+                                    flex flex-col md:flex-row items-center justify-between 
+                                    bg-gradient-to-b from-white via-[#047F01] to-white bg-[length:150%_150%] bg-no-repeat space-y-3 md:space-y-0">
+      <!-- Hello Text -->
+      <div class="flex justify-center md:justify-end w-full md:w-auto">
+        <p class="text-lg md:text-xl font-semibold text-white text-center md:text-right">
+          Contact us on Whatsapp
+        </p>
+      </div>
+
+      <!-- Start Chat Button -->
+      <div class="flex justify-center md:justify-start w-full md:w-auto">
+        <button class="bg-white text-green-600 px-5 py-2 rounded text-sm sm:text-lg font-semibold shadow-md">
+          Start Chat
+        </button>
+      </div>
+
+    </div>
+
+    <!-- pill buton -->
+    <section  data-aos="fade-up" class="mountainSection">
+      <section class="w-full py-10 md:py-16 flex justify-center bg-black">
+
+        <div
+          class="w-[90%] md:w-[95%] lg:w-[81%]   max-w-[1140px] h-[150px] sm:h-[200px] md:h-[280px] lg:h-[360px] bg-cover bg-[center_90%]  bg-no-repeat flex items-center justify-between px-6 md:px-16 rounded-xl"
+          style="background-image: url('./images/ksaPic.jpg');">
+
+          <!-- Text Content -->
+          <div class="text-white">
+            <h1 class="text-[25px] sm:text-3xl md:text-5xl font-semibold leading-tight">
+              Rules of Behaviour <br>
+              KSA
+            </h1>
+          </div>
+
+          <!-- Arrow Button -->
+          <div
+            class=" w-9 sm:w-12  h-9 sm:h-12 md:w-16 md:h-16 border-2 border-white rounded-full flex items-center justify-center">
+            <span class="text-white text-xl md:mb-1 md:text-4xl">→</span>
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+    <!-- footer -->
+    <footer class="bg-gray-800 text-white py-10 px-6 md:px-16">
+      <div class="w-[90%] max-w-[1000px] mx-auto flex flex-col md:flex-row justify-between items-start gap-10">
+
+        <!-- Logo on Left -->
+        <div class="flex-shrink-0">
+          <img src="./images/logo.png" alt="logo" class="h-12 md:h-22 w-auto" />
+        </div>
+
+        <!-- Right Section (3 columns using flex) -->
+        <div class="flex flex-co flex-row gap-8 flex-wrap flex1 justify-between md:justify-end">
+
+          <!-- About Us -->
+          <div class="min-w-[120px]">
+            <h3 class="text-lg font-semibold mb-3">About Us</h3>
+            <ul class="space-y-2 text-sm text-gray-300">
+              <li><a href="#" class="hover:underline">Our Story</a></li>
+              <li><a href="#" class="hover:underline">Mission</a></li>
+              <li><a href="#" class="hover:underline">Careers</a></li>
+            </ul>
+          </div>
+
+          <!-- Contact -->
+          <div class="min-w-[120px]">
+            <h3 class="text-lg font-semibold mb-3">Contact</h3>
+            <ul class="space-y-2 text-sm text-gray-300">
+              <li><a href="#" class="hover:underline">Email</a></li>
+              <li><a href="#" class="hover:underline">Phone</a></li>
+              <li><a href="#" class="hover:underline">Location</a></li>
+            </ul>
+          </div>
+
+          <!-- Support -->
+          <div class="min-w-[120px]">
+            <h3 class="text-lg font-semibold mb-3">Support</h3>
+            <ul class="space-y-2 text-sm text-gray-300">
+              <li><a href="#" class="hover:underline">FAQs</a></li>
+              <li><a href="#" class="hover:underline">Help Center</a></li>
+              <li><a href="#" class="hover:underline">Live Chat</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </footer>
+
+
+    <!-- container div -->
+  </div>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 1000, // duration in ms
+      once: false
+    });
+    const toggleBtn = document.getElementById("themeToggle");
+    const page = document.getElementById("page");
+
+    toggleBtn.addEventListener("click", function (e) {
+      e.preventDefault(); // prevent page jump
+
+      // Toggle background and text color
+      page.classList.toggle("bg-black");
+      page.classList.toggle("text-white");
+
+      page.classList.toggle("bg-white");
+      page.classList.toggle("text-black");
+    });
+
+    // Toggle menu visibility on small screens
+    const menuToggle = document.getElementById("menuToggle");
+    const menuIcon = document.getElementById("menuIcon");
+
+    menuToggle.addEventListener("click", () => {
+      menuLinks.classList.toggle("hidden");
+      menuIcon.textContent = menuLinks.classList.contains("hidden") ? "☰" : "✖";
+    });
+
+  </script>
+</body>
+
+</html>
