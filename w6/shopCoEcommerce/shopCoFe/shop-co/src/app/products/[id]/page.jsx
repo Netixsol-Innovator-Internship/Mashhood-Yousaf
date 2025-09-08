@@ -8,6 +8,8 @@ import AlsoLike from "@/components/AlsoLike";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, updateQuantity } from "@/store/cartSlice";
+import ProductReviews from "@/components/ProductReviews";
+import { toast } from "react-toastify";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -73,6 +75,7 @@ export default function ProductDetails() {
   };
 
 const handleAddToCart = () => {
+  toast.success("Item Added To Cart")
   const cartItem = {
     productId: product._id,
     title: product.title,
@@ -239,6 +242,7 @@ const handleAddToCart = () => {
           </div>
         </main>
       </div>
+      <ProductReviews productId={id} />
       <AlsoLike />
     </section>
   );
