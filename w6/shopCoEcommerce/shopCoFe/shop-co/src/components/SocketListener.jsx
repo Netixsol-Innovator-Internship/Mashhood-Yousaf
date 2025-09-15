@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 export default function SocketListener() {
   useEffect(() => {
-    const socket = io("http://localhost:8000");
+    const socket = io("https://shop-co.up.railway.app");
 
     socket.on("orderNotification", (data) => {
       console.log("📦 Order Received (Global):", data.message);

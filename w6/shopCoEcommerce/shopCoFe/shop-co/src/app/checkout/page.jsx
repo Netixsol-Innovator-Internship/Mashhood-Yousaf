@@ -1,18 +1,25 @@
 "use client";
+
 import { useSelector, useDispatch } from "react-redux";
 import { clearCart } from "@/store/cartSlice";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCreateOrderMutation } from "@/store/shopCoApi";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 
 export default function CheckoutPage() {
   const { items, totalAmount } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const router = useRouter();
-  const [createOrder, { isLoading }] = useCreateOrderMutation();
-  const [orderLoading, setOrderLoading] = useState(false);
+  const [createOrder] = useCreateOrderMutation();
 
-  const discount = totalAmount * 0.2; // ✅ no discount
+  const discount = totalAmount * 0.2;
   const deliveryFee = 15;
   const finalTotal = totalAmount - discount + deliveryFee;
 
@@ -22,41 +29,57 @@ export default function CheckoutPage() {
     paymentMethod: "cod",
   });
 
-  const handleChange = (e) => {
+  const [orderId, setOrderId] = useState(null);
+  const [clientSecret, setClientSecret] = useState(null);
+  const [orderLoading, setOrderLoading] = useState(false);
+
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleConfirmOrder = async () => {
     if (formData.city.trim().length < 3 || formData.country.trim().length < 3) {
       alert("All fields are required and must be at least 3 characters.");
       return;
     }
+
     try {
       setOrderLoading(true);
+
+      // 1️⃣ Create Order
       const orderData = {
         items,
         totalAmount,
-        discount: totalAmount * 0.2, // ✅ fix
+        discount,
         shippingAddress: formData,
-        paymentMethod: formData.paymentMethod, // "cod" or "stripe"
+        paymentMethod: formData.paymentMethod,
       };
 
-      const res = await createOrder(orderData).unwrap(); // ✅ RTK Query
+      const res = await createOrder(orderData).unwrap();
+      console.log("✅ Order created:", res);
+      setOrderId(res._id);
 
-      console.log("✅ Order Success:", res);
-
-      // socket.on("orderNotification", (data) => {
-      //   console.log("📦 New Order Placed:", data.message);
-      //   toast.success(`📦 New Order: ${data.message}`);
-      // });
-
-      dispatch(clearCart());
-      router.push("/order-success");
+      if (formData.paymentMethod === "stripe") {
+        // 2️⃣ Create PaymentIntent
+        const intentRes = await fetch(
+          "https://shop-co.up.railway.app/payments/create-intent",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId: res._id }),
+          }
+        );
+        const data = await intentRes.json();
+        setClientSecret(data.clientSecret);
+      } else {
+        // 3️⃣ COD Flow
+        dispatch(clearCart());
+        router.push("/order-success");
+      }
     } catch (err) {
-      console.error("❌ Order Error:", err);
-      alert("Something went wrong while confirming order.");
+      console.error("❌ Order error:", err);
+      alert("Something went wrong.");
     } finally {
-      setOrderLoading(true);
+      setOrderLoading(false);
     }
   };
 
@@ -66,19 +89,10 @@ export default function CheckoutPage() {
 
       {/* Shipping Form */}
       <div className="space-y-4 bg-white shadow-sm rounded-xl p-6 mb-6">
-        {/* <input
-          type="text"
-          name="address"
-          placeholder="Address"
-          value={formData.address}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-3 py-2"
-        /> */}
         <input
           type="text"
           name="city"
-          required
-          placeholder="City & Adress"
+          placeholder="City & Address"
           value={formData.city}
           onChange={handleChange}
           className="w-full border rounded-lg px-3 py-2"
@@ -91,8 +105,6 @@ export default function CheckoutPage() {
           onChange={handleChange}
           className="w-full border rounded-lg px-3 py-2"
         />
-
-        {/* Payment Method */}
         <select
           name="paymentMethod"
           value={formData.paymentMethod}
@@ -105,8 +117,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Order Summary */}
-      <div className="bg-white shadow-sm rounded-xl p-6 space-y-3">
-        <h2 className="font-semibold text-lg mb-2">Order Summary</h2>
+      <div className="bg-white shadow-sm rounded-xl p-6 space-y-3 mb-6">
         <div className="flex justify-between">
           <span>Subtotal</span>
           <span>${totalAmount.toFixed(2)}</span>
@@ -126,16 +137,81 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Confirm Order */}
+      {/* Stripe Payment Form */}
+      {clientSecret ? (
+        <Elements
+          stripe={loadStripe(
+            "pk_test_51S65AID6GutWOdXGTMGNjSOyoFKUW83y9LYWHunEwfyDwmPnFPbCnzadPMbYDK9gavUnSysX1avmDfwOledtLFJQ00cMwOg2Kd"
+          )}
+          options={{ clientSecret }}
+        >
+          <StripeCheckoutForm
+            orderId={orderId}
+            clientSecret={clientSecret}
+            formData={formData}
+            dispatch={dispatch}
+            router={router}
+          />
+        </Elements>
+      ) : (
+        <button
+          onClick={handleConfirmOrder}
+          className="mt-6 w-full bg-black text-white py-3 rounded-lg font-medium"
+        >
+          {orderLoading ? "Ordering..." : "Confirm Order →"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Stripe Form Component
+function StripeCheckoutForm({
+  orderId,
+  clientSecret,
+  formData,
+  dispatch,
+  router,
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    if (!stripe || !elements) return;
+    setLoading(true);
+
+    const card = elements.getElement(CardElement);
+    const { error, paymentIntent } = await stripe.confirmCardPayment(
+      clientSecret,
+      {
+        payment_method: {
+          card,
+          billing_details: { name: formData.city },
+        },
+      }
+    );
+
+    if (error) {
+      alert(error.message);
+      setLoading(false);
+      return;
+    }
+
+    console.log("✅ Payment succeeded:", paymentIntent);
+    dispatch(clearCart());
+    router.push("/order-success");
+  };
+
+  return (
+    <div className="space-y-4">
+      <CardElement className="p-3 border rounded" />
       <button
-        onClick={handleConfirmOrder}
-        className="mt-6 w-full bg-black text-white py-3 rounded-lg font-medium"
+        onClick={handlePayment}
+        disabled={loading}
+        className="w-full bg-green-600 text-white py-3 rounded-lg"
       >
-        {orderLoading ? (
-          <p className="animate-pulse transition"> Ordering...</p>
-        ) : (
-          <p> Confirm Order →</p>
-        )}
+        {loading ? "Processing..." : "Pay Now"}
       </button>
     </div>
   );

@@ -29,6 +29,8 @@ const ProfilePage = () => {
     loyaltyPoints,
     addresses = [],
     isActive,
+    provider,
+    avatar
   } = data || {};
 
   return (
@@ -54,8 +56,19 @@ const ProfilePage = () => {
             {loyaltyPoints}
           </p>
           <p>
+            <span className="font-semibold">Provider:</span> {provider}
+          </p>
+          <p>
             <span className="font-semibold">Active:</span>{" "}
             {isActive ? "Yes" : "No"}
+          </p>
+          <p className="flex items-center gap-2">
+            <span className="font-semibold">Image:</span>
+            <img
+              src={avatar}
+              alt="User Avatar"
+              className="w-12 h-12 rounded-full border"
+            />
           </p>
         </div>
 

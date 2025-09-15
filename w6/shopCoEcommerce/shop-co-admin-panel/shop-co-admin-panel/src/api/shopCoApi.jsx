@@ -2,7 +2,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:8000",
+  baseUrl: "https://shop-co.up.railway.app", // for production
+  // baseUrl: "http://localhost:8000", // for localy
   // prepareHeaders: (headers) => {
   //   const token = localStorage.getItem("token");
   //   if (token) {
@@ -102,7 +103,7 @@ export const shopCoApi = createApi({
         url: "/products",
         params: {
           page: params.page || 1,
-          limit: params.limit || 10,
+          limit: params.limit || 20,
           category: params.category,
           minPrice: params.minPrice,
           maxPrice: params.maxPrice,
@@ -183,7 +184,7 @@ export const shopCoApi = createApi({
     }),
 
     getProductReviews: builder.query({
-      query: ({ productId, page = 1, limit = 10 }) => ({
+      query: ({ productId, page = 1, limit = 20 }) => ({
         url: `/reviews/product/${productId}`,
         params: { page, limit },
       }),
@@ -219,7 +220,7 @@ export const shopCoApi = createApi({
         url: "/orders",
         params: {
           page: params.page || 1,
-          limit: params.limit || 10,
+          limit: params.limit || 20,
           status: params.status,
         },
       }),
@@ -241,7 +242,7 @@ export const shopCoApi = createApi({
         url: "/reviews",
         params: {
           page: params.page || 1,
-          limit: params.limit || 10,
+          limit: params.limit || 20,
         },
       }),
       providesTags: ["Review"],
