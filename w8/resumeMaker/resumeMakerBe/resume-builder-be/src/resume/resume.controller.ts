@@ -44,7 +44,8 @@ export class ResumeController {
       'Content-Length': pdfBuffer.length,
     });
 
-    res.end(pdfBuffer);
+    // res.end(pdfBuffer);
+    res.send(pdfBuffer); // safer than res.end()
   }
 
   @Get(':id/docx')

@@ -11,6 +11,7 @@ export default function ViewResumePage() {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   const { id } = useParams();
   const { user } = useAuth();
@@ -41,6 +42,7 @@ export default function ViewResumePage() {
 
   const handleDownload = async (type) => {
     try {
+      setDownloading(true)
       const token = user?.token || localStorage.getItem("token");
       const response = await axios.get(
         `https://resume-builder-be.vercel.app/resume/${id}/${type}`,
@@ -61,6 +63,8 @@ export default function ViewResumePage() {
       link.click();
     } catch (err) {
       console.error("Download failed:", err);
+    }finally{
+      setDownloading(false);
     }
   };
 
@@ -199,18 +203,38 @@ export default function ViewResumePage() {
               <footer className="mt-10 pt-6 border-t border-gray-200 flex justify-center gap-4">
                 <button
                   onClick={() => handleDownload("pdf")}
-                  className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-medium"
+                  className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2"
+                  disabled={downloading.pdf}
                 >
-                  <i className="fas fa-file-pdf mr-2" />
-                  Download PDF
+                  {downloading ? (
+                    <>
+                      <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-file-pdf" />
+                      Download PDF
+                    </>
+                  )}
                 </button>
 
                 <button
                   onClick={() => handleDownload("docx")}
-                  className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm font-medium"
+                  className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2"
+                  disabled={downloading.docx}
                 >
-                  <i className="fas fa-file-word mr-2" />
-                  Download DOCX
+                  {downloading ? (
+                    <>
+                      <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-file-word" />
+                      Download DOCX
+                    </>
+                  )}
                 </button>
               </footer>
             </div>
