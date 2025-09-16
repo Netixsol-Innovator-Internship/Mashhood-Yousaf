@@ -1,13 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as handlebars from 'handlebars';
-import * as puppeteer from 'puppeteer';
+// import * as handlebars from 'handlebars';
+// import * as puppeteer from 'puppeteer';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+// import { readFileSync } from 'fs';
+// import { join } from 'path';
 import { Resume } from './schemas/resume.schema';
 import { User } from '../auth/schemas/user.schema';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import handlebars from 'handlebars';
+
 
 @Injectable()
 export class ResumeService {
@@ -56,10 +62,46 @@ export class ResumeService {
     return resume;
   }
 
+  // async generatePDF(resumeId: string): Promise<Buffer> {
+  //   const resume = await this.getResumeById(resumeId);
+
+  //   // Load template
+  //   const templatePath = join(
+  //     process.cwd(),
+  //     'src',
+  //     'templates',
+  //     `template-${resume.templateId}.hbs`,
+  //   );
+
+  //   const templateSource = readFileSync(templatePath, 'utf8');
+  //   const template = handlebars.compile(templateSource);
+
+  //   // Generate HTML from template
+  //   const html = template({
+  //     ...resume.toObject(),
+  //     skills: resume.skills.join(', '),
+  //   });
+
+  //   // Generate PDF using Puppeteer
+  //   const browser = await puppeteer.launch();
+  //   const page = await browser.newPage();
+
+  //   await page.setContent(html, { waitUntil: 'networkidle0' });
+
+  //   const pdfBuffer = await page.pdf({
+  //     format: 'A4',
+  //     printBackground: true,
+  //   });
+
+  //   await browser.close();
+
+  //   // const pdfBuffer = await page.pdf({ format: 'A4' });
+  //   return Buffer.from(pdfBuffer); // convert to Node Buffer
+  // }
+
   async generatePDF(resumeId: string): Promise<Buffer> {
     const resume = await this.getResumeById(resumeId);
 
-    
     // Load template
     const templatePath = join(
       process.cwd(),
@@ -77,10 +119,15 @@ export class ResumeService {
       skills: resume.skills.join(', '),
     });
 
-    // Generate PDF using Puppeteer
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+    // Launch Puppeteer in serverless-friendly mode
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: true, // just use true instead of chromium.headless
+    });
 
+
+    const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const pdfBuffer = await page.pdf({
@@ -89,9 +136,7 @@ export class ResumeService {
     });
 
     await browser.close();
-
-    // const pdfBuffer = await page.pdf({ format: 'A4' });
-    return Buffer.from(pdfBuffer); // convert to Node Buffer
+    return Buffer.from(pdfBuffer);
   }
 
   async generateDOCX(resumeId: string): Promise<Buffer> {
