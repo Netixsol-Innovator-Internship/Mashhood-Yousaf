@@ -20,7 +20,7 @@ const callModel = async (state) => {
 // 3. Create graph
 const graph = new StateGraph(MessagesAnnotation)
   .addNode("chatbot", callModel)
-  .addEdge("__start__", "chatbot")
+  .addEdge("__start__", "chatbot");
 
 const app = graph.compile();
 
@@ -30,11 +30,11 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-console.log("🤖 Gemini LangGraph Chatbot started! Type 'exit' to quit.");
+console.log("Gemini LangGraph Chatbot started! Type 'exit' to quit.");
 
 async function ask(state = { messages: [] }) {
   rl.question("You: ", async (input) => {
-    if (input.toLowerCase() === "exit" || input.trim().length < 2 ) {
+    if (input.toLowerCase() === "exit" || input.trim().length < 2) {
       rl.close();
       return;
     }

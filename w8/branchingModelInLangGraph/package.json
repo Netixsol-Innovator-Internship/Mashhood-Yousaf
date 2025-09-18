@@ -1,0 +1,29 @@
+{
+  "name": "branchingmodelinlanggraph",
+  "version": "1.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.32",
+    "@langchain/core": "^0.3.77",
+    "@langchain/google-genai": "^0.2.18",
+    "@langchain/langgraph": "^0.4.9",
+    "@langchain/langgraph-cli": "^0.0.66",
+    "ai": "^5.0.45",
+    "dotenv": "^17.2.2",
+    "langsmith": "^0.3.69",
+    "openai": "^5.21.0",
+    "openevals": "^0.1.1",
+    "sharp": "^0.34.4",
+    "shart": "^0.0.4",
+    "zod": "^3.25.76"
+  }
+}

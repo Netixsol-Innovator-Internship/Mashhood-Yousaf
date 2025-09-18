@@ -1,0 +1,45 @@
+{
+  "nodes": [
+    {
+      "id": "__start__",
+      "type": "schema",
+      "data": {
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "id": "chatbot",
+      "type": "runnable",
+      "data": {
+        "id": [
+          "langgraph",
+          "RunnableCallable"
+        ],
+        "name": "chatbot"
+      }
+    },
+    {
+      "id": "calculator",
+      "type": "runnable",
+      "data": {
+        "id": [
+          "langgraph",
+          "RunnableCallable"
+        ],
+        "name": "calculator"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "__start__",
+      "target": "chatbot",
+      "conditional": true
+    },
+    {
+      "source": "__start__",
+      "target": "calculator",
+      "conditional": true
+    }
+  ]
+}
