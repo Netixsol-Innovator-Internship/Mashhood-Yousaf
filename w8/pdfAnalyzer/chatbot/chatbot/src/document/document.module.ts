@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DocumentController } from './document.controller';
-import { DocumentService } from './document.service';
-import { PDFDocument, PDFDocumentSchema } from './schema/document.schema';
+import { DocumentControllerV2 } from './document.controller';
+import { PdfProcessingService } from './document.service';
+import { PdfDocModel, PdfDocSchema } from './schema/document.schema';
 import { GeminiService } from '../gemini.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: PDFDocument.name, schema: PDFDocumentSchema },
+      { name: PdfDocModel.name, schema: PdfDocSchema },
     ]),
   ],
-  controllers: [DocumentController],
-  providers: [DocumentService, GeminiService],
+  controllers: [DocumentControllerV2],
+  providers: [PdfProcessingService, GeminiService],
 })
-export class DocumentModule {}
+export class DocumentProcessingModule {}

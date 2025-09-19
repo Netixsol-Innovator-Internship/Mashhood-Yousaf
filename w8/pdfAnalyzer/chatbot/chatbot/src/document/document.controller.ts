@@ -7,21 +7,23 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { DocumentService } from './document.service';
+import { PdfProcessingService } from './document.service';
 
-@Controller('documents')
-export class DocumentController {
-  constructor(private readonly docService: DocumentService) {}
+@Controller('docs')
+export class DocumentControllerV2 {
+  constructor(private readonly pdfService: PdfProcessingService) {}
 
-  @Post('upload')
+  @Post('upload-file')
   @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file: Express.Multer.File) {
-    return this.docService.processPDF(file);
+  async handleUpload(@UploadedFile() uploadedFile: Express.Multer.File) {
+    return this.pdfService.extractAndSave(uploadedFile);
   }
 
-  @Post(':id/ask')
-  async ask(@Param('id') id: string, @Body('question') question: string) {
-    // console.log('QUESTION');
-    return this.docService.askQuestion(id, question);
+  @Post(':docId/query')
+  async handleQuery(
+    @Param('docId') documentId: string,
+    @Body('question') userQuestion: string,
+  ) {
+    return this.pdfService.answerUserQuery(documentId, userQuestion);
   }
 }

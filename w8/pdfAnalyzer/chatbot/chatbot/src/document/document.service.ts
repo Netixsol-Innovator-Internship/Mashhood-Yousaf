@@ -1,104 +1,108 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import pdfParse from 'pdf-parse';
-import { PDFDocument } from './schema/document.schema';
+import { PdfDocModel } from './schema/document.schema';
 import { GeminiService } from '../gemini.service';
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
 
 @Injectable()
-export class DocumentService {
+export class PdfProcessingService {
   constructor(
-    @InjectModel(PDFDocument.name) private docModel: Model<PDFDocument>,
-    private gemini: GeminiService,
+    @InjectModel(PdfDocModel.name)
+    private readonly pdfDocModel: Model<PdfDocModel>,
+    private readonly geminiService: GeminiService,
   ) {}
 
-  async processPDF(file: Express.Multer.File) {
-    const pdfData = await pdfParse(file.buffer);
-    const text = pdfData.text;
+  async extractAndSave(file: Express.Multer.File) {
+    const parsedPdf = await pdfParse(file.buffer);
+    const entireText = parsedPdf.text;
 
-    //  State  
-    const DocState = Annotation.Root({
-      text: Annotation<string>,
-      chunks: Annotation<string[]>,
-      summary: Annotation<string>,
-      category: Annotation<string>,
-      highlights: Annotation<string[]>,
+    // Define document annotations state
+    const DocumentState = Annotation.Root({
+      fullText: Annotation<string>,
+      textChunks: Annotation<string[]>,
+      summaryText: Annotation<string>,
+      documentType: Annotation<string>,
+      keyHighlights: Annotation<string[]>,
     });
 
-    //  Graph  
-    const graph = new StateGraph(DocState)
-      // Split PDF into streams
-      .addNode('split', async (state) => {
+    // Build processing graph
+    const pipelineGraph = new StateGraph(DocumentState)
+      .addNode('splitText', async (state) => {
         const chunks: string[] = [];
-        for (let i = 0; i < state.text.length; i += 1000) {
-          chunks.push(state.text.slice(i, i + 1000));
+        for (let i = 0; i < state.fullText.length; i += 1000) {
+          chunks.push(state.fullText.slice(i, i + 1000));
         }
-        console.log(chunks);
-        return { chunks };
+        return { textChunks: chunks };
       })
 
-      .addNode('summarize', async (state) => {
-        const summary = await this.gemini.generateText(
-          `Summarize this document:\n${state.text.substring(0, 3000)}`,
+      .addNode('generateSummary', async (state) => {
+        const summaryOutput = await this.geminiService.generateText(
+          `Please summarize the following content:\n${state.fullText.substring(0, 3500)}`,
         );
-        // console.log(summary);
-        return { summary };
+        return { summaryText: summaryOutput };
       })
 
-      .addNode('categorize', async (state) => {
-        const category = await this.gemini.generateText(
-          `Classify into: Research Paper, Resume , Business Report, User Manual, Other:\n${state.text.substring(0, 1000)}`,
+      .addNode('identifyCategory', async (state) => {
+        const categoryOutput = await this.geminiService.generateText(
+          `Classify the document as one of: Research Paper, Resume, Business Report, User Manual, Other.\nContent snippet:\n${state.fullText.substring(0, 1000)}`,
         );
-        return { category };
+        return { documentType: categoryOutput };
       })
 
-      .addNode('highlight', async (state) => {
-        const highlightsRaw = await this.gemini.generateText(
-          `Give 5 bullet highlights:\n${state.text.substring(0, 2000)}`,
+      .addNode('extractHighlights', async (state) => {
+        const highlightsRaw = await this.geminiService.generateText(
+          `List  2 to 5 key bullet points from the document:\n${state.fullText.substring(0, 3000)}`,
         );
-        const highlights = highlightsRaw.split('\n').filter(Boolean);
-        return { highlights };
+        const highlightsArr = highlightsRaw
+          .split('\n')
+          .filter((line) => line.trim());
+        return { keyHighlights: highlightsArr };
       });
 
-    graph
-      .addEdge('__start__', 'split')
-      .addEdge('split', 'summarize')
-      .addEdge('summarize', 'categorize')
-      .addEdge('categorize', 'highlight')
-      .addEdge('highlight', '__end__');
+    pipelineGraph
+      .addEdge('__start__', 'splitText')
+      .addEdge('splitText', 'generateSummary')
+      .addEdge('generateSummary', 'identifyCategory')
+      .addEdge('identifyCategory', 'extractHighlights')
+      .addEdge('extractHighlights', '__end__');
 
-    const app = graph.compile();
+    const compiledPipeline = pipelineGraph.compile();
 
-    // langgraph Pipeline
-    const result = await app.invoke({ text });
-
-    const newDoc = new this.docModel({
-      filename: file.originalname,
-      summary: result.summary,
-      category: result.category,
-      highlights: result.highlights,
+    const processedData = await compiledPipeline.invoke({
+      fullText: entireText,
     });
 
-    return newDoc.save();
+    const newDocumentEntry = new this.pdfDocModel({
+      filename: file.originalname,
+      summary: processedData.summaryText,
+      category: processedData.documentType,
+      highlights: processedData.keyHighlights,
+    });
+
+    return newDocumentEntry.save();
   }
 
-  async askQuestion(docId: string, question: string) {
-    const doc = await this.docModel.findById(docId);
-    if (!doc) return { answer: 'Document not found' };
+  async answerUserQuery(documentId: string, question: string) {
+    const storedDoc = await this.pdfDocModel.findById(documentId);
+    if (!storedDoc) return { answer: 'Document not found' };
 
-    const context =
-      doc.summary + '\n' + doc.category + '\n' + doc.highlights.join('\n');
-   const prompt = `Respond only using the provided document content. Write . If the information is missing, reply with "Answer not found in document".
+    const combinedContext = [
+      storedDoc.summary,
+      storedDoc.category,
+      ...storedDoc.highlights,
+    ].join('\n');
 
-    Context:
-    ${context}
+    const promptText = `Using only the content below, answer the question. If information is missing, respond with "please write a more detailed query or make sure the query is related to extracted text".
 
-    Question: What is  ${question}?`;
+Context:
+${combinedContext}
 
-    const answer = await this.gemini.generateText(prompt);
-    return { answer };
+Question: What is ${question}?`;
+
+    const response = await this.geminiService.generateText(promptText);
+    return { answer: response };
   }
 }
