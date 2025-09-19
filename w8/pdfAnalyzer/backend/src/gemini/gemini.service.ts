@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // backend/src/gemini/gemini.service.ts
 import { Injectable, HttpException } from '@nestjs/common';
 import axios from 'axios';
