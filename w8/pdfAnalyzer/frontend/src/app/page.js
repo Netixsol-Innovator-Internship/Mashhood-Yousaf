@@ -10,8 +10,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef(null);
 
-  // const API_BASE = "https://pdf-analyzer-chatbot-be.vercel.app"; // Replace with your API URL
-  const API_BASE = "http://localhost:8000"; // Replace with your API URL
+  const API_BASE = "https://pdf-analyzer-chatbot-be.vercel.app"; // Replace with your API URL
+  // const API_BASE = "http://localhost:8000"; // Replace with your API URL
 
   // Scroll chat to bottom on new message
   useEffect(() => {
