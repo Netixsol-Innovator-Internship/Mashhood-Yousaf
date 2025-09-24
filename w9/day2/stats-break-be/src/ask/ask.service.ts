@@ -4,41 +4,45 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { StateGraph } from '@langchain/langgraph';
 import { MongoService } from '../mongo/mongo.service';
 import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 dotenv.config();
 
 @Injectable()
 export class AskService implements OnModuleInit {
-  private graph;
-
-  constructor(private readonly mongoService: MongoService) {}
-
-  async onModuleInit() {
-    this.initializeGraph();
-    console.log('✅ AskService initialized with database connection');
-  }
-
-  // Remove the entire waitForDatabaseConnection method
-
-  private model = new ChatGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY!,
-    model: 'gemini-2.5-flash',
-  });
+  private graph: any;
+  private model: ChatGoogleGenerativeAI;
 
   MessagesAnnotation = z.object({
+    userId: z.string(),
     messages: z.array(
       z.object({
         role: z.string(),
         content: z.string(),
       }),
     ),
+    memory: z.string().optional(),
     route: z.string().optional(),
     mongoQuery: z.any().optional(),
     result: z.any().optional(),
+    collection: z.string().optional(),
   });
 
-  private initializeGraph() {
-    const relevancyChecker = async (state) => {
+  constructor(private readonly mongoService: MongoService) {
+    this.model = new ChatGoogleGenerativeAI({
+      apiKey: process.env.GEMINI_API_KEY!,
+      model: 'gemini-2.5-flash',
+    });
+  }
+
+  async onModuleInit() {
+    await this.initializeGraph();
+    console.log('✅ AskService initialized with memory system');
+  }
+
+  private async initializeGraph() {
+    // 1. Relevancy Checker
+    const relevancyChecker = async (state: any) => {
       const input = state.messages.at(-1)?.content || '';
       const isRelevant =
         /cricket|run|score|match|odi|test|t20|team|player|wicket|century|average|strike rate/i.test(
@@ -47,6 +51,7 @@ export class AskService implements OnModuleInit {
 
       if (!isRelevant) {
         return {
+          ...state,
           messages: [
             ...state.messages,
             {
@@ -58,15 +63,65 @@ export class AskService implements OnModuleInit {
         };
       }
 
-      return { ...state, route: 'queryGenerator' };
+      return { ...state, route: 'memoryRetriever' };
     };
 
-    const queryGenerator = async (state) => {
+    // 2. Memory Retriever
+    const memoryRetriever = async (state: any) => {
+      const { userId } = state;
+
+      try {
+        // Get last 10 conversations
+        const conversations = await this.mongoService
+          .getCollection('conversations')
+          .find({ userId: new ObjectId(userId) })
+          .sort({ createdAt: -1 })
+          .limit(10)
+          .toArray();
+
+        // Get summary if exists
+        const summary = await this.mongoService
+          .getCollection('summaries')
+          .findOne({ userId: new ObjectId(userId) });
+
+        const memoryContext = [
+          ...(summary ? [`Summary: ${summary.summary}`] : []),
+          ...conversations.map(
+            (c) => `Previous: Q: ${c.question} | A: ${c.answer}`,
+          ),
+        ].join('\n');
+
+        console.log('🧠 Retrieved memory context:', memoryContext);
+
+        return {
+          ...state,
+          memory: memoryContext || 'No previous conversations',
+          route: 'queryGenerator',
+        };
+      } catch (error) {
+        console.error('❌ Error retrieving memory:', error);
+        return {
+          ...state,
+          memory: 'No memory available',
+          route: 'queryGenerator',
+        };
+      }
+    };
+
+    // 3. Query Generator (Enhanced with Memory)
+    const queryGenerator = async (state: any) => {
       const userQuestion = state.messages.at(-1).content;
+      const memoryContext = state.memory || '';
 
       const prompt = `
-You are a MongoDB query expert for cricket statistics.
-Given a user question about cricket, generate a MongoDB query for the cricket_db database.
+You are a MongoDB query expert for cricket statistics with memory of previous conversations.
+
+PREVIOUS CONVERSATIONS (for context):
+${memoryContext}
+
+CURRENT QUESTION: "${userQuestion}"
+
+Generate a MongoDB query for the cricket_db database based on the current question and conversation context.
 
 Available collections: "test", "odi", "t20"
 
@@ -97,10 +152,15 @@ Return ONLY valid JSON with these fields:
 - "sort": sorting object (optional)
 - "limit": number (optional)
 - "projection": fields to return (optional)
-- "aggregation": boolean (optional)
-- "pipeline": MongoDB aggregation pipeline (if applicable)
 
-User Question: "${userQuestion}"
+Example for "highest ODI score":
+{
+  "collection": "odi",
+  "query": { "Runs": { "$exists": true } },
+  "sort": { "Runs": -1 },
+  "limit": 5,
+  "projection": { "Team": 1, "Runs": 1, "Opposition": 1, "Ground": 1, "_id": 0 }
+}
 `;
 
       try {
@@ -108,55 +168,28 @@ User Question: "${userQuestion}"
           { role: 'user', content: prompt },
         ]);
 
-        const responseText =
-          typeof response.content === 'string'
-            ? response.content
-            : Array.isArray((response.content as any)?.parts)
-              ? (response.content as any).parts.map((p) => p.text).join('\n') ||
-                ''
-              : '';
+        const responseText = this.extractContent(response);
+        console.log('🧠 Gemini Query Generation Output:', responseText);
 
-        // Clean the response
-        const cleanedResponse = responseText
-          .replace(/```json/g, '')
-          .replace(/```/g, '')
-          .replace(/^[^{]*/, '') // Remove any text before the first {
-          .replace(/[^}]*$/, '') // Remove any text after the last }
-          .trim();
+        const cleanedResponse = this.cleanJsonResponse(responseText);
+        const mongoQuery = JSON.parse(cleanedResponse);
 
-        console.log('🧠 Cleaned Gemini Output:\n', cleanedResponse);
-
-        const queryData = JSON.parse(cleanedResponse);
-        console.log('✅ Parsed Query Data:', queryData);
-
-        return {
-          ...state,
-          mongoQuery: queryData,
-        };
+        console.log('✅ Parsed Query Data:', mongoQuery);
+        return { ...state, mongoQuery };
       } catch (error) {
         console.error('❌ Error generating query:', error);
-        return {
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              role: 'assistant',
-              content: '❌ Error generating query. Please try again.',
-            },
-          ],
-          route: 'finalResponse',
-        };
+        return this.createFallbackQuery(state, error);
       }
     };
 
-    const queryExecutor = async (state) => {
+    // 4. Query Executor
+    const queryExecutor = async (state: any) => {
       console.log(
-        '📦 Incoming state at queryExecutor:',
+        '📦 Executing query with state:',
         JSON.stringify(state, null, 2),
       );
 
       if (!state.mongoQuery) {
-        console.error('❌ mongoQuery missing from state!');
         return {
           ...state,
           messages: [
@@ -164,7 +197,7 @@ User Question: "${userQuestion}"
             {
               role: 'assistant',
               content:
-                '❌ Could not generate a valid MongoDB query. Please try rephrasing your question.',
+                '❌ Could not generate a valid query. Please try rephrasing your question.',
             },
           ],
           route: 'finalResponse',
@@ -172,181 +205,556 @@ User Question: "${userQuestion}"
       }
 
       const { collection, query, sort, limit, projection } = state.mongoQuery;
+      const question =
+        state.messages
+          .find((m: any) => m.role === 'user')
+          ?.content.toLowerCase() || '';
 
-      // Validate collection
-      if (!collection || !['test', 'odi', 't20'].includes(collection)) {
-        console.error('❌ Invalid collection:', collection);
-        return {
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              role: 'assistant',
-              content: `❌ Invalid collection "${collection}". Available collections: test, odi, t20.`,
-            },
-          ],
-          route: 'finalResponse',
-        };
+      // Validate and determine collection
+      const validCollection = this.determineCollection(question, collection);
+      if (!validCollection) {
+        return this.handleInvalidCollection(state, collection);
       }
 
+      // Build final query parameters
+      const finalQuery = this.buildFinalQuery(question, query);
+      const finalSort = this.determineSortOrder(question, sort);
+      const finalLimit = limit || 5;
+
+      console.log(`🔍 Executing query:`, {
+        collection: validCollection,
+        query: finalQuery,
+        sort: finalSort,
+        limit: finalLimit,
+      });
+
       try {
-        const col = this.mongoService.getCollection(collection);
-        console.log(`✅ Accessing collection: ${collection}`);
+        const col = this.mongoService.getCollection(validCollection);
+        let cursor = col.find(finalQuery);
 
-        let data;
+        if (finalSort) cursor = cursor.sort(finalSort);
+        if (finalLimit) cursor = cursor.limit(finalLimit);
+        if (projection) cursor = cursor.project(projection);
 
-        // Check if query is an aggregation pipeline (array) or find query (object)
-        if (Array.isArray(query)) {
-          // This is an aggregation pipeline
-          console.log('🔧 Using aggregation pipeline');
-          data = await col.aggregate(query).toArray();
-        } else {
-          // This is a regular find query
-          console.log('🔧 Using find query');
-          let cursor = col.find(query || {});
-          if (sort) cursor = cursor.sort(sort);
-          if (limit) cursor = cursor.limit(limit);
-          if (projection) cursor = cursor.project(projection);
-          data = await cursor.toArray();
+        const data = await cursor.toArray();
+        console.log(
+          `✅ Found ${data.length} documents from ${validCollection}`,
+        );
+
+        if (data.length > 0) {
+          data.slice(0, 3).forEach((doc: any, index: number) => {
+            console.log(
+              `   ${index + 1}. Team: ${doc.Team}, Runs: ${doc.Runs}`,
+            );
+          });
         }
 
-        console.log(
-          `✅ Query executed successfully. Found ${data.length} documents`,
-        );
-        console.log('📊 Actual query results:', JSON.stringify(data, null, 2));
-
-        return { ...state, result: data };
+        return {
+          ...state,
+          result: data,
+          collection: validCollection,
+          route: 'answerFormatter',
+        };
       } catch (error) {
         console.error('❌ Database error:', error);
+        return this.handleDatabaseError(state, error);
+      }
+    };
+
+    // 5. Answer Formatter
+    const answerFormatter = async (state: any) => {
+      const question =
+        state.messages.find((m: any) => m.role === 'user')?.content || '';
+      const result = state.result || [];
+      const collection = state.collection || 'cricket';
+
+      if (!result || result.length === 0) {
         return {
           ...state,
           messages: [
             ...state.messages,
             {
               role: 'assistant',
-              content: '❌ Database error occurred. Please try again.',
+              content:
+                '❌ No data found for your query. Please try a different question.',
             },
           ],
-          route: 'finalResponse',
-        };
-      }
-    };
-    const getAnswerHeader = (question: string) => {
-      const q = question.toLowerCase();
-      if (q.includes('lowest')) return 'Here are the lowest team scores:';
-      if (q.includes('highest')) return 'Here are the highest team scores:';
-      if (q.includes('won') || q.includes('who won')) return 'Match result:';
-      if (q.includes('how many') && q.includes('test'))
-        return 'Total Test matches:';
-      if (q.includes('score')) return 'Match score details:';
-      return 'Here is the information you requested:';
-    };
-
-    const answerFormatter = async (state: any) => {
-      console.log('📊 Formatting answer with result:', state.result);
-
-      const question = state.messages?.[0]?.content || '';
-
-      if (!state.result || state.result.length === 0) {
-        return {
-          messages: [
-            ...state.messages,
-            {
-              role: 'assistant',
-              content: '❌ No data found for your question.',
-            },
-          ],
+          route: 'memorySaver',
         };
       }
 
       try {
-        const allFields = new Set<string>();
-        state.result.forEach((doc: any) => {
-          Object.keys(doc).forEach((field) => allFields.add(field));
-        });
-
-        const headers = Array.from(allFields).filter(
-          (field) => field !== '_id',
+        const formattedAnswer = await this.formatAnswer(
+          question,
+          result,
+          collection,
         );
-        const rows = state.result.map((row: any) =>
-          headers.map((h) => String(row[h] || 'N/A')).join(' | '),
-        );
-
-        const table = [
-          `**${headers.join(' | ')}**`,
-          headers.map(() => '---').join(' | '),
-          ...rows,
-        ].join('\n');
-
-        const header = getAnswerHeader(question);
 
         return {
+          ...state,
           messages: [
             ...state.messages,
             {
               role: 'assistant',
-              content: `${header}\n\n${table}`,
+              content: formattedAnswer,
             },
           ],
+          route: 'memorySaver',
         };
       } catch (error) {
         console.error('❌ Error formatting answer:', error);
-        return {
-          messages: [
-            ...state.messages,
-            { role: 'assistant', content: '❌ Error formatting results.' },
-          ],
-        };
+        return this.handleAnswerFormatError(state, error);
       }
     };
 
-   
-    const finalResponse = async (state) => {
-      console.log('🏁 Final response state:', state);
+    // 6. Memory Saver
+    const memorySaver = async (state: any) => {
+      try {
+        await this.saveConversation(state);
+        return { ...state, route: 'finalResponse' };
+      } catch (error) {
+        console.error('❌ Error saving memory:', error);
+        return { ...state, route: 'finalResponse' }; // Continue even if memory save fails
+      }
+    };
+
+    // 7. Final Response
+    const finalResponse = async (state: any) => {
+      console.log('🏁 Final response ready');
       return state;
     };
 
+    // Build the graph
     const graph = new StateGraph(this.MessagesAnnotation)
       .addNode('relevancyChecker', relevancyChecker)
+      .addNode('memoryRetriever', memoryRetriever)
       .addNode('queryGenerator', queryGenerator)
       .addNode('queryExecutor', queryExecutor)
       .addNode('answerFormatter', answerFormatter)
+      .addNode('memorySaver', memorySaver)
       .addNode('finalResponse', finalResponse)
-      .addConditionalEdges('__start__', () => 'relevancyChecker', {
-        relevancyChecker: 'relevancyChecker',
-      })
+
+      // Add edges
+      .addEdge('__start__', 'relevancyChecker')
       .addConditionalEdges(
         'relevancyChecker',
-        (state) => state.route ?? 'finalResponse',
+        (state: any) => state.route || 'finalResponse',
         {
-          queryGenerator: 'queryGenerator',
+          memoryRetriever: 'memoryRetriever',
           finalResponse: 'finalResponse',
         },
       )
+      .addEdge('memoryRetriever', 'queryGenerator')
       .addEdge('queryGenerator', 'queryExecutor')
       .addEdge('queryExecutor', 'answerFormatter')
-      .addEdge('answerFormatter', 'finalResponse');
+      .addEdge('answerFormatter', 'memorySaver')
+      .addEdge('memorySaver', 'finalResponse');
 
     this.graph = graph.compile();
-    console.log('✅ LangGraph workflow initialized');
+    console.log('✅ LangGraph workflow with memory system initialized');
   }
 
-  async processQuestion(question: string) {
+  // Helper methods
+  private extractContent(response: any): string {
+    if (typeof response.content === 'string') {
+      return response.content;
+    }
+    if (Array.isArray((response.content as any)?.parts)) {
+      return (
+        (response.content as any).parts.map((p: any) => p.text).join('\n') || ''
+      );
+    }
+    return JSON.stringify(response.content) || '';
+  }
+
+  private cleanJsonResponse(responseText: string): string {
+    let cleaned = responseText
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .replace(/^[^{[]*/, '')
+      .trim();
+
+    const lastBrace = Math.max(
+      cleaned.lastIndexOf('}'),
+      cleaned.lastIndexOf(']'),
+    );
+    if (lastBrace !== -1) {
+      cleaned = cleaned.slice(0, lastBrace + 1);
+    }
+
+    cleaned = cleaned.replace(/ISODate\("([^"]+)"\)/g, '"$1"');
+    cleaned = cleaned.replace(/\/\/.*$/gm, '');
+
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON object found in model output');
+
+    return jsonMatch[0];
+  }
+
+  private createFallbackQuery(state: any, error: any): any {
+    const question = state.messages.at(-1).content.toLowerCase();
+    let collection = 'odi';
+
+    if (question.includes('t20') || question.includes('twenty20')) {
+      collection = 't20';
+    } else if (question.includes('test')) {
+      collection = 'test';
+    }
+
+    let sortOrder = { Runs: -1 };
+    if (question.includes('lowest score') || question.includes('lowest')) {
+      sortOrder = { Runs: 1 };
+    }
+
+    const fallbackQuery = {
+      collection: collection,
+      query: { Runs: { $gt: 0 } },
+      sort: sortOrder,
+      limit: 5,
+      projection: {
+        Team: 1,
+        Runs: 1,
+        Overs: 1,
+        Opposition: 1,
+        Ground: 1,
+        'Start Date': 1,
+        _id: 0,
+      },
+    };
+
+    console.log('🔄 Using fallback query:', fallbackQuery);
+    return { ...state, mongoQuery: fallbackQuery };
+  }
+
+  private determineCollection(
+    question: string,
+    suggestedCollection: string,
+  ): string | null {
+    if (question.includes('odi') || question.includes('one day')) return 'odi';
+    if (question.includes('t20') || question.includes('twenty20')) return 't20';
+    if (question.includes('test')) return 'test';
+
+    if (
+      suggestedCollection &&
+      ['test', 'odi', 't20'].includes(suggestedCollection)
+    ) {
+      return suggestedCollection;
+    }
+
+    return 'odi'; // Default
+  }
+
+  private handleInvalidCollection(state: any, collection: string): any {
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        {
+          role: 'assistant',
+          content: `❌ Invalid collection "${collection}". Available collections: test, odi, t20.`,
+        },
+      ],
+      route: 'finalResponse',
+    };
+  }
+
+  private buildFinalQuery(question: string, suggestedQuery: any): any {
+    if (!suggestedQuery || typeof suggestedQuery !== 'object') {
+      return { Runs: { $gt: 0 } };
+    }
+    return suggestedQuery;
+  }
+
+  private determineSortOrder(question: string, suggestedSort: any): any {
+    if (question.includes('lowest score') || question.includes('lowest')) {
+      return { Runs: 1 };
+    }
+    if (question.includes('highest score') || question.includes('highest')) {
+      return { Runs: -1 };
+    }
+    return suggestedSort || { Runs: -1 };
+  }
+
+  private handleDatabaseError(state: any, error: any): any {
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        {
+          role: 'assistant',
+          content: '❌ Database error occurred. Please try again.',
+        },
+      ],
+      route: 'finalResponse',
+    };
+  }
+
+  private async formatAnswer(
+    question: string,
+    results: any[],
+    collection: string,
+  ): Promise<string> {
+    const header = this.getAnswerHeader(question, collection);
+
+    // If result is exactly one item and it has <= 2-3 fields: show as simple text
+    if (results.length === 1) {
+      const flatFields = Object.keys(results[0] || {}).length;
+
+      if (flatFields <= 3) {
+        return await this.formatSingleResult(question, results[0], collection);
+      }
+    }
+
+    // For multiple or complex results, return markdown table
+    return this.formatAsMarkdownTable(results, header);
+  }
+
+  private formatAsMarkdownTable(results: any[], header: string): string {
+    if (!results || results.length === 0) return 'No results to show.';
+
+    const maxRows = 10;
+    const displayData = results.slice(0, maxRows);
+
+    // Dynamically get all keys from data to build columns
+    const allKeys = Array.from(
+      new Set(displayData.flatMap((obj) => Object.keys(obj))),
+    ).filter((k) => k !== '_id'); // Hide _id
+
+    // Table header
+    let markdown = `### ${header}\n\n| ${allKeys.join(' | ')} |\n| ${allKeys.map(() => '---').join(' | ')} |\n`;
+
+    // Table rows
+    for (const row of displayData) {
+      const rowData = allKeys.map((key) => {
+        const value = row[key];
+        if (value instanceof Date) return value.toISOString().split('T')[0];
+        return value ?? '';
+      });
+      markdown += `| ${rowData.join(' | ')} |\n`;
+    }
+
+    if (results.length > maxRows) {
+      markdown += `\n_...and ${results.length - maxRows} more rows._`;
+    }
+
+    return markdown;
+  }
+
+  private getAnswerHeader(question: string, collection: string): string {
+    const q = question.toLowerCase();
+    if (q.includes('lowest'))
+      return `Lowest scores in ${collection.toUpperCase()}:`;
+    if (q.includes('highest'))
+      return `Highest scores in ${collection.toUpperCase()}:`;
+    if (q.includes('won') || q.includes('who won'))
+      return `Match results in ${collection.toUpperCase()}:`;
+    if (q.includes('how many'))
+      return `Count results in ${collection.toUpperCase()}:`;
+    return `Cricket data from ${collection.toUpperCase()}:`;
+  }
+
+  private async formatSingleResult(
+    question: string,
+    result: any,
+    collection: string,
+  ): Promise<string> {
+    const prompt = `
+Based on this cricket data, provide a concise answer to the question.
+
+Question: "${question}"
+Collection: ${collection}
+Data: ${JSON.stringify(result)}
+
+Provide a clear, direct answer focusing on the key information.
+`;
+
+    const response = await this.model.invoke([
+      { role: 'user', content: prompt },
+    ]);
+    return this.extractContent(response);
+  }
+
+  private formatMultipleResults(
+    question: string,
+    results: any[],
+    collection: string,
+    header: string,
+  ): string {
+    let response = `${header}\n\n`;
+
+    results.slice(0, 5).forEach((result, index) => {
+      response += `${index + 1}. Team: ${result.Team || 'N/A'}`;
+      if (result.Runs) response += `, Runs: ${result.Runs}`;
+      if (result.Opposition) response += ` vs ${result.Opposition}`;
+      if (result.Ground) response += ` at ${result.Ground}`;
+      if (result.Result) response += ` (${result.Result})`;
+      response += '\n';
+    });
+
+    if (results.length > 5) {
+      response += `\n... and ${results.length - 5} more results`;
+    }
+
+    return response;
+  }
+
+  private handleAnswerFormatError(state: any, error: any): any {
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        {
+          role: 'assistant',
+          content:
+            '✅ Here are the results:\n' +
+            JSON.stringify(state.result, null, 2),
+        },
+      ],
+      route: 'memorySaver',
+    };
+  }
+
+  private async saveConversation(state: any): Promise<void> {
+    const { userId, messages } = state;
+
+    const userMessage = messages.find((m: any) => m.role === 'user');
+    const assistantMessage = messages.find((m: any) => m.role === 'assistant');
+
+    if (!userMessage || !assistantMessage) {
+      console.log('⚠️ No complete conversation to save');
+      return;
+    }
+
+    const conversationsCollection =
+      this.mongoService.getCollection('conversations');
+
+    // Save conversation
+    await conversationsCollection.insertOne({
+      userId: new ObjectId(userId),
+      question: userMessage.content,
+      answer: assistantMessage.content,
+      createdAt: new Date(),
+    });
+
+    console.log('💾 Conversation saved to memory');
+
+    // Check if we need to summarize (every 5 conversations)
+    const conversationCount = await conversationsCollection.countDocuments({
+      userId: new ObjectId(userId),
+    });
+
+    if (conversationCount >= 5) {
+      await this.createSummary(userId);
+    }
+  }
+
+  private async createSummary(userId: string): Promise<void> {
+    const conversationsCollection =
+      this.mongoService.getCollection('conversations');
+    const summariesCollection = this.mongoService.getCollection('summaries');
+
+    const recentConversations = await conversationsCollection
+      .find({ userId: new ObjectId(userId) })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .toArray();
+
+    const summaryPrompt = `
+Summarize these cricket conversations into 3-5 key bullet points about the user's interests:
+
+${recentConversations.map((c: any) => `Q: ${c.question}\nA: ${c.answer}`).join('\n\n')}
+
+Focus on:
+- Types of questions asked (scores, players, matches, etc.)
+- Specific teams or players mentioned
+- Preferred formats (Test, ODI, T20)
+- Key facts discussed
+
+Keep it concise and useful for future context.
+`;
+
+    try {
+      const summaryResp = await this.model.invoke([
+        { role: 'user', content: summaryPrompt },
+      ]);
+      const summaryText = this.extractContent(summaryResp);
+
+      await summariesCollection.updateOne(
+        { userId: new ObjectId(userId) },
+        {
+          $set: {
+            summary: summaryText,
+            lastUpdated: new Date(),
+            conversationCount: recentConversations.length,
+          },
+        },
+        { upsert: true },
+      );
+
+      console.log('📝 Memory summary updated');
+
+      // Clean up old conversations
+      await conversationsCollection.deleteMany({
+        userId: new ObjectId(userId),
+        _id: { $nin: recentConversations.map((c: any) => c._id) },
+      });
+    } catch (error) {
+      console.error('❌ Error creating summary:', error);
+    }
+  }
+
+  async processQuestion(userId: string, question: string): Promise<string> {
     try {
       if (!this.graph) {
         throw new Error('Graph not initialized');
       }
 
-      console.log(`🤔 Processing question: "${question}"`);
+      console.log(`🤔 Processing question from user ${userId}: "${question}"`);
+
       const result = await this.graph.invoke({
+        userId,
         messages: [{ role: 'user', content: question }],
       });
 
-      const lastMessage = result.messages.at(-1);
-      return lastMessage ? lastMessage.content : 'No response generated';
+      const lastAssistantMsg = result.messages.findLast(
+        (m: any) => m.role === 'assistant',
+      );
+      return lastAssistantMsg
+        ? lastAssistantMsg.content
+        : 'No response generated';
     } catch (error) {
       console.error('❌ Error processing question:', error);
       return '❌ Sorry, an error occurred while processing your question.';
+    }
+  }
+
+  async getHistory(userId: string) {
+    try {
+      // Conversations (last 10)
+      const conversations = await this.mongoService
+        .getCollection('conversations')
+        .find({ userId: new ObjectId(userId) })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .toArray();
+
+      // Summary
+      const summary = await this.mongoService
+        .getCollection('summaries')
+        .findOne({ userId: new ObjectId(userId) });
+
+      return {
+        userId,
+        summary: summary ? summary.summary : null,
+        conversations: conversations.map((c) => ({
+          question: c.question,
+          answer: c.answer,
+          createdAt: c.createdAt,
+        })),
+      };
+    } catch (error) {
+      console.error('❌ Error fetching history:', error);
+      throw new Error('Failed to fetch conversation history');
     }
   }
 }

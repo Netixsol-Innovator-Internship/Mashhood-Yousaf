@@ -8,7 +8,7 @@ export class MongoService implements OnModuleInit {
 
   async onModuleInit() {
     const uri =
-      'mongodb+srv://mashhoodyousaf24:mashhoodyousaf24@stats-cluster.0rgwzqq.mongodb.net/?retryWrites=true&w=majority&appName=stats-cluster';
+      'mongodb+srv://mashhoodyousaf24:mashhoodyousaf24@stats-cluster.0rgwzqq.mongodb.net/cricket_db?retryWrites=true&w=majority&appName=stats-cluster';
     this.client = new MongoClient(uri);
     await this.client.connect();
     this.db = this.client.db('cricket_db');

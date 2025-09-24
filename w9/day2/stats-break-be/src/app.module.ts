@@ -3,6 +3,7 @@ import { AskModule } from './ask/ask.module';
 import { UploadModule } from './upload/upload.module';
 import { MongoModule } from './mongo/mongo.module';
 import { MongooseModule } from '@nestjs/mongoose'; // Add this import
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { MongooseModule } from '@nestjs/mongoose'; // Add this import
     UploadModule,
     MongoModule,
     AskModule,
+    AuthModule
   ],
 })
 export class AppModule {}
