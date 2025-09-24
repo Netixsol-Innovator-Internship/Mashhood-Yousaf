@@ -158,7 +158,7 @@ Example for "highest ODI score":
   "collection": "odi",
   "query": { "Runs": { "$exists": true } },
   "sort": { "Runs": -1 },
-  "limit": 5,
+  "limit": 100,
   "projection": { "Team": 1, "Runs": 1, "Opposition": 1, "Ground": 1, "_id": 0 }
 }
 `;
@@ -219,7 +219,7 @@ Example for "highest ODI score":
       // Build final query parameters
       const finalQuery = this.buildFinalQuery(question, query);
       const finalSort = this.determineSortOrder(question, sort);
-      const finalLimit = limit || 5;
+      const finalLimit = limit || 100;
 
       console.log(`🔍 Executing query:`, {
         collection: validCollection,
@@ -410,7 +410,7 @@ Example for "highest ODI score":
       collection: collection,
       query: { Runs: { $gt: 0 } },
       sort: sortOrder,
-      limit: 5,
+      limit: 100,
       projection: {
         Team: 1,
         Runs: 1,
@@ -489,6 +489,26 @@ Example for "highest ODI score":
     };
   }
 
+  // private async formatAnswer(
+  //   question: string,
+  //   results: any[],
+  //   collection: string,
+  // ): Promise<string> {
+  //   const header = this.getAnswerHeader(question, collection);
+
+  //   // If result is exactly one item and it has <= 2-3 fields: show as simple text
+  //   if (results.length === 1) {
+  //     const flatFields = Object.keys(results[0] || {}).length;
+
+  //     if (flatFields <= 3) {
+  //       return await this.formatSingleResult(question, results[0], collection);
+  //     }
+  //   }
+
+  //   // For multiple or complex results, return markdown table
+  //   return this.formatAsMarkdownTable(results, header);
+  // }
+
   private async formatAnswer(
     question: string,
     results: any[],
@@ -496,24 +516,14 @@ Example for "highest ODI score":
   ): Promise<string> {
     const header = this.getAnswerHeader(question, collection);
 
-    // If result is exactly one item and it has <= 2-3 fields: show as simple text
-    if (results.length === 1) {
-      const flatFields = Object.keys(results[0] || {}).length;
-
-      if (flatFields <= 3) {
-        return await this.formatSingleResult(question, results[0], collection);
-      }
-    }
-
-    // For multiple or complex results, return markdown table
+    // Har case me table me dikhana hai
     return this.formatAsMarkdownTable(results, header);
   }
 
   private formatAsMarkdownTable(results: any[], header: string): string {
     if (!results || results.length === 0) return 'No results to show.';
 
-    const maxRows = 10;
-    const displayData = results.slice(0, maxRows);
+    const displayData = results;
 
     // Dynamically get all keys from data to build columns
     const allKeys = Array.from(
@@ -531,10 +541,6 @@ Example for "highest ODI score":
         return value ?? '';
       });
       markdown += `| ${rowData.join(' | ')} |\n`;
-    }
-
-    if (results.length > maxRows) {
-      markdown += `\n_...and ${results.length - maxRows} more rows._`;
     }
 
     return markdown;
