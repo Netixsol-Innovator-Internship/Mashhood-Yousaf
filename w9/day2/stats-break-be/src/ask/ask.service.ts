@@ -22,7 +22,7 @@ export class AskService implements OnModuleInit {
 
   private model = new ChatGoogleGenerativeAI({
     apiKey: process.env.GEMINI_API_KEY!,
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.5-flash',
   });
 
   MessagesAnnotation = z.object({
@@ -300,65 +300,7 @@ User Question: "${userQuestion}"
       }
     };
 
-    // const answerFormatter = async (state: any) => {
-    //   console.log('📊 Formatting answer with result:', state.result);
-
-    //   if (!state.result || state.result.length === 0) {
-    //     return {
-    //       messages: [
-    //         ...state.messages,
-    //         {
-    //           role: 'assistant',
-    //           content: '❌ No data found for your question.',
-    //         },
-    //       ],
-    //     };
-    //   }
-
-    //   try {
-    //     // Format as table for multiple results
-    //     if (state.result.length > 0) {
-    //       // Get all unique field names from all documents
-    //       const allFields = new Set<string>();
-    //       state.result.forEach((doc: any) => {
-    //         Object.keys(doc).forEach((field) => allFields.add(field));
-    //       });
-
-    //       const headers = Array.from(allFields).filter(
-    //         (field) => field !== '_id',
-    //       );
-
-    //       const rows = state.result.map((row: any) =>
-    //         headers.map((h) => String(row[h] || 'N/A')).join(' | '),
-    //       );
-
-    //       const table = [
-    //         `**${headers.join(' | ')}**`,
-    //         headers.map(() => '---').join(' | '),
-    //         ...rows,
-    //       ].join('\n');
-
-    //       return {
-    //         messages: [
-    //           ...state.messages,
-    //           {
-    //             role: 'assistant',
-    //             content: `Here are the top team scores:\n\n${table}`,
-    //           },
-    //         ],
-    //       };
-    //     }
-    //   } catch (error) {
-    //     console.error('❌ Error formatting answer:', error);
-    //     return {
-    //       messages: [
-    //         ...state.messages,
-    //         { role: 'assistant', content: '❌ Error formatting results.' },
-    //       ],
-    //     };
-    //   }
-    // };
-
+   
     const finalResponse = async (state) => {
       console.log('🏁 Final response state:', state);
       return state;

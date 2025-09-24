@@ -15,7 +15,7 @@ export default function AskPage() {
     setAnswer(null);
 
     try {
-      const response = await axios.post("http://localhost:4000/ask", {
+      const response = await axios.post("https://stats-break-be-production.up.railway.app/ask", {
         question: question,
       });
 
