@@ -10,7 +10,7 @@ async function bootstrap() {
   //  const appService = app.get(AppService);
   //  await appService.onModuleInit();
 
-  await app.listen(4000);
+  await app.listen(process.env.PORT ?? 4000);
   console.log('app is running on http://localhost:4000');
 }
 bootstrap();
