@@ -31,7 +31,7 @@ export class AskService implements OnModuleInit {
   constructor(private readonly mongoService: MongoService) {
     this.model = new ChatGoogleGenerativeAI({
       apiKey: process.env.GEMINI_API_KEY!,
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
     });
   }
 
@@ -44,12 +44,29 @@ export class AskService implements OnModuleInit {
     // 1. Relevancy Checker
     const relevancyChecker = async (state: any) => {
       const input = state.messages.at(-1)?.content || '';
-      const isRelevant =
-        /cricket|run|score|match|odi|test|t20|team|player|wicket|century|average|strike rate/i.test(
-          input,
-        );
+      // const isRelevant =
+      //   /cricket|run|score|match|odi|test|t20|team|player|wicket|century|average|strike rate/i.test(
+      //     input,
+      //   );
 
-      if (!isRelevant) {
+      const prompt = `
+You are an intelligent assistant for a cricket information system.
+
+QUESTION: "${input}"
+
+Determine whether the question is related to the game of cricket or not.
+
+Reply with ONLY "Yes" or "No".
+`;
+
+     const response = await this.model.invoke(prompt);
+     const geminiResponse = this.extractContent(response);
+      const isCricketRelated = geminiResponse
+        .trim()
+        .toLowerCase()
+        .startsWith('yes');
+
+      if (!isCricketRelated) {
         return {
           ...state,
           messages: [
@@ -113,55 +130,130 @@ export class AskService implements OnModuleInit {
       const userQuestion = state.messages.at(-1).content;
       const memoryContext = state.memory || '';
 
-      const prompt = `
-You are a MongoDB query expert for cricket statistics with memory of previous conversations.
+//       const prompt = `
+// You are a MongoDB query expert specialized in cricket statistics with memory of past conversations.
 
-PREVIOUS CONVERSATIONS (for context):
-${memoryContext}
+// PAST CONTEXT:
+// ${memoryContext}
 
-CURRENT QUESTION: "${userQuestion}"
+// USER QUESTION: "${userQuestion}"
 
-Generate a MongoDB query for the cricket_db database based on the current question and conversation context.
+// You are accessing the "cricket_db" database with collections: "test", "odi", and "t20".
 
-Available collections: "test", "odi", "t20"
+// Important fields (case-sensitive):
+// - Team
+// - Score
+// - Runs
+// - Overs
+// - RPO
+// - Lead
+// - Inns
+// - Result
+// - Opposition
+// - Ground
+// - Start Date
 
-IMPORTANT: The database has these EXACT field names (case-sensitive):
-- Team (team name)
-- Score (team score/runs, like "214/5")
-- Runs (numeric runs)
-- Overs 
-- RPO (runs per over)
-- Lead
-- Inns (innings)
-- Result
-- Opposition
-- Ground
-- "Start Date"
 
-Handle special question types:
-- "highest score" → sort by "Runs": -1
-- "lowest score" → sort by "Runs": 1
-- "who won" or "Result" → filter by { "Result": "won" }
-- "how many tests/ODIs/T20s" → use count of documents
-- "matches played by X" → filter { "Team": "X" }
-- "scores against Y" → filter by { "Opposition": "Y" }
+// Return ONLY a valid JSON object with these fields:
+// - "collection": one of "test", "odi", or "t20"
+// - "query": MongoDB query
+// - "sort": sorting object (optional)
+// - "limit": number (optional)
+// - "projection": (optional)
 
-Return ONLY valid JSON with these fields:
-- "collection": one of "test", "odi", or "t20"
-- "query": MongoDB query object
-- "sort": sorting object (optional)
-- "limit": number (optional)
-- "projection": fields to return (optional)
+// Example output:
+// {
+//   "collection": "odi",
+//   "query": { "Runs": { "$exists": true } },
+//   "sort": { "Runs": -1 },
+//   "limit": 5,
+//   "projection": { "Team": 1, "Runs": 1, "Opposition": 1, "Ground": 1, "_id": 0 }
+// }
+// `;
 
-Example for "highest ODI score":
+
+const prompt = `
+You are a senior-level MongoDB query expert specialized in cricket statistics.
+
+Your task is to convert the user's question into an accurate MongoDB query for the "cricket_db" database.
+
+ DATABASE INFO:
+- Collections: "test", "odi", "t20"
+- All field names are case-sensitive:
+  - "Team" (string)
+  - "Score" (string, e.g. "222/8")
+  - "Runs" (number)
+  - "Overs" (string)
+  - "RPO" (string, e.g. "4.12")
+  - "Lead" (optional)
+  - "Inns" (string)
+  - "Result" (string: "won", "lost", "draw")
+  - "Opposition" (string)
+  - "Ground" (string)
+  - "Start Date" (string, e.g. "5-Jan-71")
+
+ QUERY RULES:
+
+1. Use only the above fields. Never create or assume additional fields.
+2. For highest/lowest "Runs" or "Score", sort on **"Runs"** field.
+3. For filtering based on RPO (e.g., "RPO above 5"), use '$expr' + '$toDouble' because RPO is stored as string.
+
+Example:
+{
+  "$expr": {
+    "$gt": [ { "$toDouble": "$RPO" }, 5 ]
+  }
+}
+
+4. For date filtering ("after 2019", "before 2010", etc.), use regex on "Start Date" because it's stored as a string.
+
+Examples:
+- After 2019:
+  { "Start Date": { "$regex": "^(?!.*(197|198|199|200[0-9]|201[0-9]))" } }
+
+- Before 2010:
+  { "Start Date": { "$regex": "^(19|200[0-9])" } }
+
+5. For team-based filters:
+- "matches by Pakistan" → { "Team": "Pakistan" }
+- "against India" → { "Opposition": "India" }
+
+6. For result-based filters:
+- "who won", "winning matches" → { "Result": "won" }
+
+7. For numeric filters:
+- "scores above 300" → { "Runs": { "$gt": 300 } }
+
+8. For count-based questions:
+- Return only the query object. (No need for projection, sort, or limit)
+
+   OUTPUT FORMAT:
+
+Respond with **only** a valid JSON object. No markdown, no explanation, no extra text.
+
+Example:
 {
   "collection": "odi",
   "query": { "Runs": { "$exists": true } },
   "sort": { "Runs": -1 },
-  "limit": 100,
-  "projection": { "Team": 1, "Runs": 1, "Opposition": 1, "Ground": 1, "_id": 0 }
+  "limit": 5,
+  "projection": {
+    "Team": 1,
+    "Runs": 1,
+    "Opposition": 1,
+    "Ground": 1,
+    "Start Date": 1,
+    "_id": 0
+  }
 }
+
+📎 PREVIOUS CONTEXT:
+${memoryContext}
+
+  USER QUESTION:
+"${userQuestion}"
 `;
+
 
       try {
         const response = await this.model.invoke([
