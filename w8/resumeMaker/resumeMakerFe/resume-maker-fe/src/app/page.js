@@ -11,8 +11,7 @@ export default function HomePage() {
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
             Build your perfect resume with our easy-to-use resume builder.
-            Choose from professional templates and download in PDF or Word
-            format.
+            Choose from professional templates and download in it.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

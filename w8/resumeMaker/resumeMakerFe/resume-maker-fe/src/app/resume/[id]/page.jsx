@@ -11,7 +11,7 @@ export default function ViewResumePage() {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState({ pdf: false, docx: false });
 
   const { id } = useParams();
   const { user } = useAuth();
@@ -24,11 +24,14 @@ export default function ViewResumePage() {
       try {
         const token = user?.token || localStorage.getItem("token");
 
-        const response = await axios.get(`https://resume-builder-be.vercel.app/resume/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `https://resume-builder-be.vercel.app/resume/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setResume(response.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch resume");
@@ -42,7 +45,7 @@ export default function ViewResumePage() {
 
   const handleDownload = async (type) => {
     try {
-      setDownloading(true)
+      setDownloading((prev) => ({ ...prev, [type]: true }));
       const token = user?.token || localStorage.getItem("token");
       const response = await axios.get(
         `https://resume-builder-be.vercel.app/resume/${id}/${type}`,
@@ -63,8 +66,8 @@ export default function ViewResumePage() {
       link.click();
     } catch (err) {
       console.error("Download failed:", err);
-    }finally{
-      setDownloading(false);
+    } finally {
+      setDownloading((prev) => ({ ...prev, [type]: false }));
     }
   };
 
@@ -206,7 +209,7 @@ export default function ViewResumePage() {
                   className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2"
                   disabled={downloading.pdf}
                 >
-                  {downloading ? (
+                  {downloading.pdf ? (
                     <>
                       <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
                       Downloading...
@@ -214,17 +217,17 @@ export default function ViewResumePage() {
                   ) : (
                     <>
                       <i className="fas fa-file-pdf" />
-                      Download PDF
+                      Download  
                     </>
                   )}
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => handleDownload("docx")}
                   className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm font-medium flex items-center justify-center gap-2"
                   disabled={downloading.docx}
                 >
-                  {downloading ? (
+                  {downloading.docx ? (
                     <>
                       <span className="animate-spin h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
                       Downloading...
@@ -235,7 +238,7 @@ export default function ViewResumePage() {
                       Download DOCX
                     </>
                   )}
-                </button>
+                </button> */}
               </footer>
             </div>
           </div>

@@ -488,6 +488,44 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
       }
     };
 
+    // Add this new node to format the response
+    const resultHandler = async (state: any) => {
+      if (!state.result || state.result.length === 0) {
+        return {
+          ...state,
+          messages: [
+            ...state.messages,
+            {
+              role: 'assistant',
+              content:
+                "I couldn't find any products matching your criteria. Please try different search terms or broader criteria.",
+            },
+          ],
+          route: 'memorySaver',
+        };
+      }
+
+      // Format the results into a readable response
+      const productList = state.result
+        .map(
+          (product: any, index: number) =>
+            `${index + 1}. **${product.name}** (${product.brand}) - ₹${product.price}\n   ${product.description}\n   Dosage: ${product.dosage || 'Not specified'}\n   Ingredients: ${product.ingredients}`,
+        )
+        .join('\n\n');
+
+      return {
+        ...state,
+        messages: [
+          ...state.messages,
+          {
+            role: 'assistant',
+            content: `I found ${state.result.length} product(s) matching your criteria:\n\n${productList}`,
+          },
+        ],
+        route: 'memorySaver',
+      };
+    };
+
     // 5. Memory Saver: Save Q&A into conversations collection
     const memorySaver = async (state: any) => {
       try {
@@ -509,6 +547,7 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
       .addNode('memoryRetriever', memoryRetriever)
       .addNode('queryGenerator', queryGenerator)
       .addNode('queryExecutor', queryExecutor)
+      .addNode('resultHandler', resultHandler)
       .addNode('memorySaver', memorySaver)
       .addNode('finalResponse', finalResponse)
       .addEdge('__start__', 'relevancyChecker')
@@ -522,7 +561,8 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
       )
       .addEdge('memoryRetriever', 'queryGenerator')
       .addEdge('queryGenerator', 'queryExecutor')
-      .addEdge('queryExecutor', 'memorySaver')
+      .addEdge('queryExecutor', 'resultHandler')
+      .addEdge('resultHandler', 'memorySaver')
       .addEdge('memorySaver', 'finalResponse');
 
     this.graph = graph.compile();
@@ -608,6 +648,39 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
   }
 
   // Main entry point for processing user questions
+  // async processQuestion(userId: string, question: string): Promise<any> {
+  //   try {
+  //     if (!this.graph) {
+  //       throw new Error('Graph not initialized');
+  //     }
+
+  //     const result = await this.graph.invoke({
+  //       userId,
+  //       messages: [{ role: 'user', content: question }],
+  //     });
+
+  //     // Return raw product JSON array or empty array
+  //     // return result.result || [];
+
+  //     // Return the assistant's response message
+  //     const assistantMessage = result.messages.find(
+  //       (m: any) => m.role === 'assistant',
+  //     );
+  //     return {
+  //       response: assistantMessage?.content || 'No response generated',
+  //       products: result.result || [],
+  //     };
+  //   } catch (error) {
+  //     console.error('❌ Error processing question:', error);
+  //     return {
+  //       error: '❌ Sorry, an error occurred while processing your question.',
+  //       response: 'Please try again with a different question.',
+  //     };
+  //   }
+  // }
+
+  // src/ask/ask.service.ts
+
   async processQuestion(userId: string, question: string): Promise<any> {
     try {
       if (!this.graph) {
@@ -619,20 +692,31 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
         messages: [{ role: 'user', content: question }],
       });
 
-      // Return raw product JSON array or empty array
-      // return result.result || [];
+      console.log('Graph result:', JSON.stringify(result, null, 2));
 
-      // Return the assistant's response message
+      // Find the assistant's response message
       const assistantMessage = result.messages.find(
         (m: any) => m.role === 'assistant',
       );
-      return {
-        response: assistantMessage?.content || 'No response generated',
-        products: result.result || [],
-      };
+
+      if (assistantMessage) {
+        return {
+          success: true,
+          response: assistantMessage.content,
+          products: result.result || [],
+        };
+      } else {
+        // If no assistant message found, create a default response
+        return {
+          success: true,
+          response: 'I found these products matching your criteria:',
+          products: result.result || [],
+        };
+      }
     } catch (error) {
       console.error('❌ Error processing question:', error);
       return {
+        success: false,
         error: '❌ Sorry, an error occurred while processing your question.',
         response: 'Please try again with a different question.',
       };

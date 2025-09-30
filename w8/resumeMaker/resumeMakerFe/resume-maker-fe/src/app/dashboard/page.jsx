@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
+  const [id, setId] = useState("");
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function DashboardPage() {
         const decoded = jwtDecode(token);
         console.log('decoded', decoded)
         setEmail(decoded.email); // ✅ extract email from token
+        setId(decoded.id); // ✅ extract email from token
       } catch (err) {
         console.error("Invalid token", err);
       }
@@ -166,19 +168,19 @@ export default function DashboardPage() {
                       </button>
                     </div>
                     <div className="mt-2 grid grid-cols-2 gap-2">
-                      <button
+                      {/* <button
                         onClick={() => handleDownload("pdf")}
                         className="bg-green-600 hover:bg-green-700 text-white text-center py-3 px-4 rounded-md font-medium"
                       >
-                        Download PDF
-                      </button>
+                        Download CV
+                      </button> */}
 
-                      <button
+                      {/* <button
                         onClick={() => handleDownload("docx")}
                         className="bg-purple-600 hover:bg-purple-700 text-white text-center py-3 px-4 rounded-md font-medium"
                       >
                         Download DOCX
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 ))}

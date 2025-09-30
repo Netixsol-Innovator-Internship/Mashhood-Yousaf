@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Controller, Get, Query } from '@nestjs/common';
 import { MongoService } from './mongo/mongo.service';
 
@@ -9,7 +10,7 @@ export class ProductsController {
   async getProducts(
     @Query('name') name?: string,
     @Query('page') page = 1,
-    @Query('limit') limit = 100,
+    @Query('limit') limit = 10,
   ) {
     const collection = this.mongoService.getCollection('products');
 

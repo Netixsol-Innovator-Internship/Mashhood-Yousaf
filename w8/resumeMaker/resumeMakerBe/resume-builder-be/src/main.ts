@@ -6,6 +6,7 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'https://resume-maker-fe.vercel.app', // your frontend
+    'http://localhost:3000',
   ];
 
   app.enableCors({
