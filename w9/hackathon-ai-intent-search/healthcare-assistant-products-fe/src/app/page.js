@@ -2,21 +2,16 @@
 import { useState, useEffect, useRef } from "react";
 import { authService } from "./auth";
 import { useRouter } from "next/navigation";
-
-const SpeechRecognition =
-  typeof window !== "undefined" &&
-  (window.SpeechRecognition || window.webkitSpeechRecognition);
-
-const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-
-if (recognition) {
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = "en-US";
-}
+import { MicrophoneIcon } from "@heroicons/react/24/solid";
 
 export default function Home() {
+  const SpeechRecognition =
+    typeof window !== "undefined" &&
+    (window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,30 +24,116 @@ export default function Home() {
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef(null);
 
-  const startListening = () => {
-    if (!recognition) return alert("Speech recognition not supported");
+  const [voices, setVoices] = useState([]);
 
-    setIsListening(true);
-    recognition.start();
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const loadVoices = () => {
+        const availableVoices = window.speechSynthesis.getVoices();
+        if (availableVoices.length > 0) {
+          setVoices(availableVoices);
+        }
+      };
+
+      loadVoices(); // Call once in case voices are already loaded
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  const utteranceRef = useRef(null);
+
+  const startListening = () => {
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      console.log("🎤 Voice recognition started");
+    };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      setChatInput(transcript); // populate chat input with speech
-      setIsListening(false);
+      console.log("📝 Recognized:", transcript);
+      setChatInput(transcript);
     };
 
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-      setIsListening(false);
+      console.error("Speech recognition error", event.error);
     };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      console.log("🛑 Voice recognition ended");
+    };
+
+    recognition.start();
   };
 
   const speak = (text) => {
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis) {
+      console.warn("Speech synthesis is not supported in this browser.");
+      return;
+    }
+
+    // Cancel any ongoing speech before starting a new one
+    window.speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
-    utterance.rate = 1;
-    window.speechSynthesis.speak(utterance);
+    utterance.rate = 1.3;
+    utterance.voice = voices.find((v) => v.lang === "en-US") || null;
+
+    if (voices.length > 0) {
+      utterance.voice = voices.find((v) => v.lang === "en-US") || voices[0];
+    }
+    console.log("Speech started with rate:", utterance.rate);
+
+    // Attach event handlers for debugging and state management
+    utterance.onstart = () => {
+      console.log("🔊 Speech started");
+      setIsSpeaking(true);
+    };
+
+    utterance.onend = () => {
+      console.log("✅ Speech ended");
+      setIsSpeaking(false);
+    };
+
+    utterance.onerror = (event) => {
+      console.error("❌ Speech synthesis error:", event.error);
+      setIsSpeaking(false);
+    };
+
+    // Save utterance in case you need to pause/resume
+    utteranceRef.current = utterance;
+
+    // Speak with slight delay to ensure readiness
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 100); // 100ms delay fixes race conditions in some browsers
+  };
+
+  const pauseSpeech = () => {
+    window.speechSynthesis.pause();
+    setIsPaused(true);
+  };
+
+  const resumeSpeech = () => {
+    window.speechSynthesis.resume();
+    setIsPaused(false);
+  };
+
+  const stopSpeech = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
   };
 
   const sendChatMessage = async () => {
@@ -356,15 +437,20 @@ export default function Home() {
           </div>
 
           {/* Chat Input */}
+          {/* Chat Input Row */}
           <div className="border-t border-gray-200 bg-white flex items-center px-3 py-2 gap-2">
+            {/* Voice Controls */}
             <button
               onClick={startListening}
-              className={`w-9  ${
-                isListening ? "text-red-500 animate-pulse" : "text-teal-600"
-              } hover:text-teal-800 transition`}
+              className="w-9 text-teal-600 hover:text-teal-800 transition"
               aria-label="Start Voice Input"
             >
-              <img src="/mic.jpg" alt="" />
+              <MicrophoneIcon className="w-6 h-6" />
+              {isListening && (
+                <div className="text-center text-sm text-cyan-600">
+                  Listening...
+                </div>
+              )}
             </button>
 
             <input
@@ -384,6 +470,36 @@ export default function Home() {
               ➤
             </button>
           </div>
+
+          {/* Speech Synthesis Controls - place this BELOW the input row */}
+          {isSpeaking && (
+            <div className="flex flex-col items-center justify-center text-gray-600 text-sm py-2 space-y-2">
+              <div>🔊 Speaking...</div>
+              <div className="flex space-x-2">
+                {!isPaused ? (
+                  <button
+                    onClick={pauseSpeech}
+                    className="px-3 py-1 bg-yellow-300 hover:bg-yellow-400 text-yellow-900 rounded text-xs font-medium"
+                  >
+                    ⏸ Pause
+                  </button>
+                ) : (
+                  <button
+                    onClick={resumeSpeech}
+                    className="px-3 py-1 bg-green-300 hover:bg-green-400 text-green-900 rounded text-xs font-medium"
+                  >
+                    ▶ Resume
+                  </button>
+                )}
+                <button
+                  onClick={stopSpeech}
+                  className="px-3 py-1 bg-red-300 hover:bg-red-400 text-red-900 rounded text-xs font-medium"
+                >
+                  ⏹ Stop
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
