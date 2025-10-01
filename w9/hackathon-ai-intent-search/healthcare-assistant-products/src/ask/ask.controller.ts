@@ -12,4 +12,9 @@ export class AskController {
     const result = await this.askService.processQuestion(userId, question);
     return result;
   }
+
+  @Post('symptom-check')
+  async checkSymptoms(@Body() body: { userId: string; symptoms: string }) {
+    return this.askService.processQuestion(body.userId, body.symptoms);
+  }
 }

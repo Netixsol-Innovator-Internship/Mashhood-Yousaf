@@ -1,10 +1,12 @@
 // src/ask/ask.service.ts
+/* eslint-disable */
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { StateGraph } from '@langchain/langgraph';
 import { MongoService } from '../mongo/mongo.service';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
+import { SymptomMapperService } from '../symptom-mapper/symptom-mapper.service';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -26,9 +28,14 @@ export class AskService implements OnModuleInit {
     mongoQuery: z.any().optional(),
     result: z.any().optional(),
     collection: z.string().optional(),
+    symptomAnalysis: z.any().optional(),
+    isSymptomQuery: z.boolean().optional(),
   });
 
-  constructor(private readonly mongoService: MongoService) {
+  constructor(
+    private readonly mongoService: MongoService,
+    private readonly symptomMapper: SymptomMapperService,
+  ) {
     this.model = new ChatGoogleGenerativeAI({
       apiKey: process.env.GEMINI_API_KEY!,
       model: 'gemini-2.5-flash',
@@ -40,29 +47,160 @@ export class AskService implements OnModuleInit {
     console.log('✅ AskService initialized with memory system');
   }
 
+  // Add this new node to detect symptom queries
+  private async symptomDetector(state: any) {
+    const input = state.messages.at(-1)?.content || '';
+
+    const prompt = `
+Analyze if the following user input describes health symptoms or medical concerns that could be addressed with supplements:
+
+USER INPUT: "${input}"
+
+Examples of symptom descriptions:
+- "I feel tired and weak"
+- "My joints hurt"
+- "I'm losing hair"
+- "I have trouble sleeping"
+- "My skin is dry"
+- "I get sick often"
+- "I have low energy"
+
+Examples of non-symptom queries:
+- "Show me vitamin C products"
+- "What omega-3 supplements do you have?"
+- "Products under 500 rupees"
+- "Supplements from BrandX"
+
+If the input describes symptoms, health concerns, or how the user is feeling physically/mentally, respond with "symptom".
+If it's a direct product request or general question, respond with "product".
+
+Respond with only one word: either "symptom" or "product".
+`;
+
+    try {
+      const response = await this.model.invoke(prompt);
+      const analysis = this.extractContent(response).trim().toLowerCase();
+      const isSymptomQuery = analysis === 'symptom';
+
+      return {
+        ...state,
+        isSymptomQuery,
+        route: isSymptomQuery ? 'symptomAnalyzer' : 'relevancyChecker',
+      };
+    } catch (error) {
+      console.error('❌ Error in symptom detector:', error);
+      return { ...state, isSymptomQuery: false, route: 'relevancyChecker' };
+    }
+  }
+
+  // Add this new node to analyze symptoms
+  private async symptomAnalyzer(state: any) {
+    const input = state.messages.at(-1)?.content || '';
+
+    try {
+      const analysis = await this.symptomMapper.analyzeSymptoms(input);
+
+      // Build MongoDB query based on symptom analysis
+      const keywordFilters = analysis.keywords.map((keyword) => ({
+        $or: [
+          { name: { $regex: keyword, $options: 'i' } },
+          { description: { $regex: keyword, $options: 'i' } },
+          { ingredients: { $regex: keyword, $options: 'i' } },
+          { category: { $regex: keyword, $options: 'i' } },
+        ],
+      }));
+
+      const categoryFilters = analysis.categories.map((category) => ({
+        category: { $regex: category, $options: 'i' },
+      }));
+
+      const mongoQuery = {
+        filter: {
+          $or: [
+            ...(keywordFilters.length > 0 ? [{ $or: keywordFilters }] : []),
+            ...(categoryFilters.length > 0 ? [{ $or: categoryFilters }] : []),
+          ],
+        },
+        limit: analysis.confidence > 0.7 ? 8 : 4, // Show more results for high confidence
+      };
+
+      return {
+        ...state,
+        symptomAnalysis: analysis,
+        mongoQuery,
+        route: 'queryExecutor',
+      };
+    } catch (error) {
+      console.error('❌ Error in symptom analyzer:', error);
+      return {
+        ...state,
+        route: 'relevancyChecker', // Fall back to regular product search
+      };
+    }
+  }
+
+  // Update the resultHandler to format symptom responses
+  private async resultHandler(state: any) {
+    if (!state.result || state.result.length === 0) {
+      const noProductsMessage = state.isSymptomQuery
+        ? "I understand your health concerns. While I couldn't find specific products matching your symptoms, I recommend consulting with a healthcare professional for personalized advice."
+        : "I couldn't find any products matching your criteria. Please try different search terms or broader criteria.";
+
+      return {
+        ...state,
+        messages: [
+          ...state.messages,
+          { role: 'assistant', content: noProductsMessage },
+        ],
+        route: 'memorySaver',
+      };
+    }
+
+    let responseContent = '';
+
+    if (state.isSymptomQuery && state.symptomAnalysis) {
+      const { explanation, confidence, categories } = state.symptomAnalysis;
+
+      responseContent = `${explanation}\n\n`;
+
+      if (confidence < 0.6) {
+        responseContent +=
+          '⚠️ Note: This is a general suggestion. For specific medical advice, please consult a healthcare professional.\n\n';
+      }
+
+      responseContent += `Based on your symptoms, I found ${state.result.length} product(s) that might help:\n\n`;
+    } else {
+      responseContent = `I found ${state.result.length} product(s) matching your criteria:\n\n`;
+    }
+
+    const productList = state.result
+      .map(
+        (product: any, index: number) =>
+          `${index + 1}. **${product.name}** (${product.brand}) - ₹${product.price}\n   ${product.description}\n   Dosage: ${product.dosage || 'Not specified'}\n   Ingredients: ${product.ingredients}`,
+      )
+      .join('\n\n');
+
+    responseContent += productList;
+
+    // Add follow-up question for low confidence symptom matches
+    if (state.isSymptomQuery && state.symptomAnalysis?.confidence < 0.5) {
+      responseContent += `\n\n💡 Could you provide more details about your symptoms? This helps me give you better recommendations.`;
+    }
+
+    return {
+      ...state,
+      messages: [
+        ...state.messages,
+        { role: 'assistant', content: responseContent },
+      ],
+      route: 'memorySaver',
+    };
+  }
+
   private async initializeGraph() {
     // 1. Relevancy Checker: Verify if question is about products
     const relevancyChecker = async (state: any) => {
       const input = state.messages.at(-1)?.content || '';
-
-      //       const prompt = `
-      // You are an intelligent assistant for a healthcare product recommendation system.
-
-      // QUESTION: "${input}"
-
-      // Determine whether the user's question is related to the healthcare products listed in the product catalog.
-      // The catalog includes details like product name, category, brand, description, price, ingredients (e.g., Vitamin C), and dosage (e.g., 2 capsules per day).
-
-      // Examples of relevant questions:
-      // - Suggest a product under 1000 rupees
-      // - Which product contains Vitamin C?
-      // - I have weak bones, recommend something
-      // - Any supplement that can be taken twice a day?
-      // - Show me Omega-3 supplements from CleanLiving
-
-      // If the question is related to the product catalog, answer ONLY with "Yes".
-      // If not related (e.g., personal health issues without asking for a product, general medical advice, unrelated topics), answer ONLY with "No".
-      // `;
 
       const prompt = `
 You are an intelligent assistant for a healthcare product recommendation system.
@@ -85,29 +223,6 @@ Examples of relevant questions:
 If the question is related to the product catalog (including dosage, price ranges, frequency), answer ONLY with "Yes".
 If not related (e.g., personal health issues without asking for a product, general medical advice, unrelated topics), answer ONLY with "No".
 `;
-
-      // const response = await this.model.invoke(prompt);
-      // const geminiResponse = this.extractContent(response);
-      // const isProductRelated = geminiResponse
-      //   .trim()
-      //   .toLowerCase()
-      //   .startsWith('yes');
-
-      // if (!isProductRelated) {
-      //   return {
-      //     ...state,
-      //     messages: [
-      //       ...state.messages,
-      //       {
-      //         role: 'assistant',
-      //         content: '❌ Sorry, I can only answer product-related questions.',
-      //       },
-      //     ],
-      //     route: 'finalResponse',
-      //   };
-      // }
-      // console.log('isProductRelated', isProductRelated);
-      // return { ...state, route: 'memoryRetriever' };
 
       try {
         const response = await this.model.invoke(prompt);
@@ -135,7 +250,6 @@ If not related (e.g., personal health issues without asking for a product, gener
         return { ...state, route: 'memoryRetriever' };
       } catch (error) {
         console.error('❌ Error in relevancy checker:', error);
-        // Default to proceeding if there's an error
         return { ...state, route: 'memoryRetriever' };
       }
     };
@@ -182,100 +296,6 @@ If not related (e.g., personal health issues without asking for a product, gener
     const queryGenerator = async (state: any) => {
       const userQuestion = state.messages.at(-1).content;
       const memoryContext = state.memory || '';
-
-      //       const prompt = `
-      // You are a healthcare assistant and MongoDB query generator for a product recommendation system.
-
-      // You are a smart and helpful assistant for a health supplement store. Users ask about products by name, brand, ingredients, category, or price range.
-
-      // Your job is to understand user queries even if they have spelling mistakes, typos, incomplete or approximate words.
-
-      // - If a user misspells a brand, product name, ingredient, or category, find the closest matching products.
-      // - If a user asks for products in a price range (e.g., "between 10 and 100"), filter products accordingly.
-      // - Always return relevant products with clear details: name, price, description, brand, and ingredients.
-      // - If no matching product is found, politely say "Sorry, no products match your query."
-      // - Be friendly, clear, and helpful.
-
-      // Examples of queries you should handle:
-      // - "show me nutraa coreee supplements"
-      // - "I want omega-4 products"
-      // - "products between 10 to 100 rupees"
-      // - "energy support by nutracore"
-      // - "supplement with glucosamine and msm"
-
-      // The product catalog contains these fields:
-      // - name (string)
-      // - category (string)
-      // - brand (string)
-      // - ingredients (string)
-      // - description (string)
-      // - dosage (string)
-      // - price (number)
-
-      // The user might ask questions in any natural form, including price filters like "under 300 rupees", "below 500", or brand filters like "from CleanLiving".
-
-      // Your task:
-
-      // 1. Parse the user's question.
-      // 2. Extract meaningful filters for MongoDB:
-      //   For keywords:
-      // - First, identify the meaningful **keywords** from the user's question.
-      // - If the question includes **phrases** like "immune system", split them into individual keywords like "immune" and "system".
-      // - Then, for each keyword, generate **separate $regex** (case-insensitive) filters on these fields:
-      //   - name
-      //   - ingredients
-      //   - description
-      //   - category
-      //   - brand
-      // Use "$or" to combine all the keyword regex filters.
-
-      //    - For price: recognize price-related conditions ("under", "below", "less than", "max", "up to") and generate appropriate MongoDB numeric filters.
-      // 3. If user asks for "3 products", limit results accordingly.
-      // 4. Return a valid MongoDB filter JSON object, and a separate limit number if applicable.
-
-      // Examples:
-
-      // USER: "Suggest a product under 300 rupees"
-      // OUTPUT:
-      // {
-      //   "filter": { "price": { "$lte": 300 } },
-      //   "limit": 10
-      // }
-
-      // USER: "Show me Omega-3 supplements from CleanLiving"
-      // OUTPUT:
-      // {
-      //   "filter": {
-      //     "$and": [
-      //       { "$or": [
-      //           { "ingredients": { "$regex": "omega-3", "$options": "i" } },
-      //           { "name": { "$regex": "omega-3", "$options": "i" } },
-      //           { "description": { "$regex": "omega-3", "$options": "i" } }
-      //         ]
-      //       },
-      //       { "brand": { "$regex": "CleanLiving", "$options": "i" } }
-      //     ]
-      //   },
-      //   "limit": 10
-      // }
-
-      // USER: "Give me 3 products for hair growth"
-      // OUTPUT:
-      // {
-      //   "filter": {
-      //     "$or": [
-      //       { "ingredients": { "$regex": "hair", "$options": "i" } },
-      //       { "description": { "$regex": "hair", "$options": "i" } },
-      //       { "category": { "$regex": "hair", "$options": "i" } }
-      //     ]
-      //   },
-      //   "limit": 3
-      // }
-
-      // USER: "${userQuestion}"
-
-      // ONLY return a JSON object with "filter" and optionally "limit". No explanations or markdown.
-      // `;
 
       const prompt = `
 You are a healthcare assistant and MongoDB query generator for a product recommendation system.
@@ -395,9 +415,6 @@ USER: "${userQuestion}"
 ONLY return a JSON object with "filter" and optionally "limit". No explanations or markdown.
 `;
 
-      // REVIOUS CONTEXT:
-      // ${memoryContext}
-
       try {
         const response = await this.model.invoke([
           { role: 'user', content: prompt },
@@ -452,11 +469,6 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
         let cursor = collection.find(filter || {});
         console.log('cursor', cursor);
 
-        // Limit results to 10 by default
-        // cursor = cursor.limit(10);
-
-        // const data = await cursor.toArray();
-
         if (limit && typeof limit === 'number') {
           cursor = cursor.limit(limit);
         } else {
@@ -488,44 +500,6 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
       }
     };
 
-    // Add this new node to format the response
-    const resultHandler = async (state: any) => {
-      if (!state.result || state.result.length === 0) {
-        return {
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              role: 'assistant',
-              content:
-                "I couldn't find any products matching your criteria. Please try different search terms or broader criteria.",
-            },
-          ],
-          route: 'memorySaver',
-        };
-      }
-
-      // Format the results into a readable response
-      const productList = state.result
-        .map(
-          (product: any, index: number) =>
-            `${index + 1}. **${product.name}** (${product.brand}) - ₹${product.price}\n   ${product.description}\n   Dosage: ${product.dosage || 'Not specified'}\n   Ingredients: ${product.ingredients}`,
-        )
-        .join('\n\n');
-
-      return {
-        ...state,
-        messages: [
-          ...state.messages,
-          {
-            role: 'assistant',
-            content: `I found ${state.result.length} product(s) matching your criteria:\n\n${productList}`,
-          },
-        ],
-        route: 'memorySaver',
-      };
-    };
-
     // 5. Memory Saver: Save Q&A into conversations collection
     const memorySaver = async (state: any) => {
       try {
@@ -543,14 +517,27 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
 
     // Build graph with nodes and transitions
     const graph = new StateGraph(this.MessagesAnnotation)
+      .addNode('symptomDetector', this.symptomDetector.bind(this))
+      .addNode('symptomAnalyzer', this.symptomAnalyzer.bind(this))
       .addNode('relevancyChecker', relevancyChecker)
       .addNode('memoryRetriever', memoryRetriever)
       .addNode('queryGenerator', queryGenerator)
       .addNode('queryExecutor', queryExecutor)
-      .addNode('resultHandler', resultHandler)
+      .addNode('resultHandler', this.resultHandler.bind(this))
       .addNode('memorySaver', memorySaver)
       .addNode('finalResponse', finalResponse)
-      .addEdge('__start__', 'relevancyChecker')
+
+      // Updated flow
+      .addEdge('__start__', 'symptomDetector')
+      .addConditionalEdges(
+        'symptomDetector',
+        (state: any) => state.route || 'relevancyChecker',
+        {
+          symptomAnalyzer: 'symptomAnalyzer',
+          relevancyChecker: 'relevancyChecker',
+        },
+      )
+      .addEdge('symptomAnalyzer', 'queryExecutor')
       .addConditionalEdges(
         'relevancyChecker',
         (state: any) => state.route || 'finalResponse',
@@ -566,7 +553,7 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
       .addEdge('memorySaver', 'finalResponse');
 
     this.graph = graph.compile();
-    console.log('✅ LangGraph workflow with memory system initialized');
+    console.log('✅ LangGraph workflow with symptom analysis initialized');
   }
 
   // Extract content from Gemini response
@@ -648,39 +635,6 @@ ONLY return a JSON object with "filter" and optionally "limit". No explanations 
   }
 
   // Main entry point for processing user questions
-  // async processQuestion(userId: string, question: string): Promise<any> {
-  //   try {
-  //     if (!this.graph) {
-  //       throw new Error('Graph not initialized');
-  //     }
-
-  //     const result = await this.graph.invoke({
-  //       userId,
-  //       messages: [{ role: 'user', content: question }],
-  //     });
-
-  //     // Return raw product JSON array or empty array
-  //     // return result.result || [];
-
-  //     // Return the assistant's response message
-  //     const assistantMessage = result.messages.find(
-  //       (m: any) => m.role === 'assistant',
-  //     );
-  //     return {
-  //       response: assistantMessage?.content || 'No response generated',
-  //       products: result.result || [],
-  //     };
-  //   } catch (error) {
-  //     console.error('❌ Error processing question:', error);
-  //     return {
-  //       error: '❌ Sorry, an error occurred while processing your question.',
-  //       response: 'Please try again with a different question.',
-  //     };
-  //   }
-  // }
-
-  // src/ask/ask.service.ts
-
   async processQuestion(userId: string, question: string): Promise<any> {
     try {
       if (!this.graph) {
