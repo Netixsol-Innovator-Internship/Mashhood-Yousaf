@@ -10,7 +10,7 @@ export class ProductsController {
   async getProducts(
     @Query('name') name?: string,
     @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('limit') limit = 100,
   ) {
     const collection = this.mongoService.getCollection('products');
 

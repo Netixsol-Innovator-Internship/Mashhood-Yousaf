@@ -20,12 +20,12 @@ module.exports = (req, res, next) => {
     console.log("token", token);
     next();
   } catch (err) {
-    console.log("err", err);
+    // console.log("err", err);
     const error = new Error(
       "Authentications Failed, token...",
     );
     error.status = 401;
-    console.log("error", error);
+    // console.log("error", error);
     return next(error);
   }
 };

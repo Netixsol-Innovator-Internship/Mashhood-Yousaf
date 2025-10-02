@@ -52,18 +52,21 @@ app.use((error, req, res, next) => {
 });
 
 // Config without .env
-const PORT = 8000;
-const MONGODB_URI = `mongodb+srv://mashhoodyousaf:taskCluster@cluster0.9bxzm8e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// const PORT = 8000;
+// const MONGODB_URI = `mongodb+srv://mashhoodyousaf:taskCluster@cluster0.9bxzm8e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-// Connect to DB and start server
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log(" Database connected");
-    app.listen(PORT, () => {
-      console.log(` Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Error connecting to DB:", err);
-  });
+// // Connect to DB and start server
+// mongoose
+//   .connect(MONGODB_URI)
+//   .then(() => {
+//     console.log(" Database connected");
+//     app.listen(PORT, () => {
+//       console.log(` Server running on port ${PORT}`);
+//     });
+//   })
+//   .catch((err) => {
+//     console.error("Error connecting to DB:", err);
+//   });
+
+
+module.exports = app;

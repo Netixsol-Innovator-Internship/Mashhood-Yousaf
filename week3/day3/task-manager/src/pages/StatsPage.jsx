@@ -13,9 +13,11 @@ const StatsPage = () => {
       try {
         setLoading(true);
         const statsRes = await axios.get(
+          // "https://day1-back-end.vercel.app/api/tasks/stats"
           "https://day1-back-end.vercel.app/api/tasks/stats"
         );
         const usersRes = await axios.get(
+          // "https://day1-back-end.vercel.app/api/users"
           "https://day1-back-end.vercel.app/api/users"
         );
 
@@ -47,9 +49,9 @@ const StatsPage = () => {
   
   return (
     <div className="p-4 font-sans sm:p-6 md:p-8 max-w-7xl mx-auto">
-      <p className="text-1xl md:text-2xl font-bold mb-6 text-center">
-        Our Globally Registered User and thier Tasks
-      </p>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Our Globally Registered User and their Tasks
+      </h1>
 
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 

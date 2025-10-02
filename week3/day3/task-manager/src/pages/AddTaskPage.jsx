@@ -32,6 +32,7 @@ const AddTaskPage = () => {
       }
 
       const response = await axios.post(
+        // "https://day1-back-end.vercel.app/api/tasks/",
         "https://day1-back-end.vercel.app/api/tasks/",
         { title, description },
         {
@@ -86,7 +87,7 @@ const AddTaskPage = () => {
 
         <div className="mb-6">
           <label
-            htmlFor="title"
+            htmlFor="description"
             className="block mb-1 font-medium text-gray-700"
           >
             Description <span className="text-red-500">*</span>

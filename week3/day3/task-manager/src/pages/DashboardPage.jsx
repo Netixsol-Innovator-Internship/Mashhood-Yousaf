@@ -46,6 +46,7 @@ const DashboardPage = () => {
         const userId = decoded.userId;
         console.log("userId", userId);
         const response = await axios.get(
+          // `https://day1-back-end.vercel.app/api/tasks/${userId}`,
           `https://day1-back-end.vercel.app/api/tasks/${userId}`,
           {
             headers: {
@@ -80,6 +81,7 @@ const DashboardPage = () => {
       const token = localStorage.getItem("token");
 
       const response = await axios.put(
+        // `https://day1-back-end.vercel.app/api/tasks/${taskId}`,
         `https://day1-back-end.vercel.app/api/tasks/${taskId}`,
         updatedTaskData,
         {
@@ -118,6 +120,7 @@ const DashboardPage = () => {
         }
 
         const response = await axios.delete(
+          // `https://day1-back-end.vercel.app/api/tasks/${taskId}`,
           `https://day1-back-end.vercel.app/api/tasks/${taskId}`,
           {
             headers: {

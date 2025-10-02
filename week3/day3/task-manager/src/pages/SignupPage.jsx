@@ -43,6 +43,7 @@ const SignupPage = () => {
     try {
       setLoading(true);
       const response = await axios.post(
+        // "https://day1-back-end.vercel.app/api/users/register",
         "https://day1-back-end.vercel.app/api/users/register",
         {
           name,
