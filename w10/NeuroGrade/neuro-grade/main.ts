@@ -15,7 +15,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(
-    `🚀 NeuroGrade application is running on: http://localhost:${port}/api`,
+    `🚀 NeuroGrade application is running on: http://localhsost:${port}/api`,
   );
 }
 

@@ -1,0 +1,9 @@
+{
+  "name": "CYMONK",
+  "description": "A futuristic nft roaming the blockchain.",
+  "image": "https://gray-bright-hare-501.mypinata.cloud/ipfs/bafkreibn44zdwwz6yxxp2anp3dno4p4zn6hw7rvip5uveg4tgndipj5jcu", 
+  "attributes": [
+    { "trait_type": "Color", "value": "Neon Blue" },
+    { "trait_type": "Eyes", "value": "Laser" }
+  ]
+}

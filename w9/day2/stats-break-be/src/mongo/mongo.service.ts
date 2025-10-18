@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { MongoClient, Db, Collection } from 'mongodb';
 
@@ -9,6 +10,7 @@ export class MongoService implements OnModuleInit {
   async onModuleInit() {
     const uri =
       'mongodb+srv://mashhoodyousaf24:mashhoodyousaf24@stats-cluster.0rgwzqq.mongodb.net/cricket_db?retryWrites=true&w=majority&appName=stats-cluster';
+      console.log("mongoConnected")
     this.client = new MongoClient(uri);
     await this.client.connect();
     this.db = this.client.db('cricket_db');

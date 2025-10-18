@@ -541,9 +541,14 @@ export default function Page() {
       const c = new ethers.Contract(CONTRACT_ADDRESS, TODO_ABI, s);
       const tx = await c.editTask(id, editingContent);
       await tx.wait();
+
+      // Close the edit mode immediately
       setEditingId(null);
       setEditingContent("");
-      fetchMyTasks();
+
+      setTimeout(() => {
+        fetchMyTasks();
+      }, 100);
     } catch (err) {
       console.error("editTask error", err);
       alert("Edit failed: " + (err?.message || err));
@@ -687,6 +692,9 @@ export default function Page() {
                               value={editingContent}
                               onChange={(e) =>
                                 setEditingContent(e.target.value)
+                              }
+                              onKeyDown={(e) =>
+                                e.key === "Enter" && handleSaveEdit(task.id)
                               }
                               className="border-b px-1 py-0 focus:outline-none"
                             />
