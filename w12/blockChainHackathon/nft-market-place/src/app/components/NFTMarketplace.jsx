@@ -18,6 +18,8 @@ export default function NFTMarketplace() {
   const [isOwner, setIsOwner] = useState(false);
   const [debugInfo, setDebugInfo] = useState("");
   const [basePrice, setBasePrice] = useState("0");
+  const [displayPrices, setDisplayPrices] = useState({});
+
 
   const paymentTokens = [
     {
@@ -42,6 +44,37 @@ export default function NFTMarketplace() {
     }
   }, [account]);
 
+  const updateDisplayedPrices = async (paymentToken) => {
+    try {
+      const signer = await getSigner();
+      const marketplaceContract = new ethers.Contract(
+        CONTRACT_ADDRESSES.nftMarketplace,
+        nftMarketplaceABI,
+        signer
+      );
+
+      const newPrices = {};
+      for (const listing of listings) {
+        if (paymentToken === tokenA) {
+          // Base price in SMKT already known
+          newPrices[listing.tokenId] = listing.priceInTokenA;
+        } else {
+          // Get converted price from smart contract
+          const converted = await marketplaceContract.calculatePriceInToken(
+            listing.tokenId,
+            paymentToken
+          );
+          newPrices[listing.tokenId] = converted.toString();
+        }
+      }
+
+      setDisplayPrices(newPrices);
+    } catch (error) {
+      console.error("Error updating displayed prices:", error);
+    }
+  };
+
+  
   const initializeMarketplace = async () => {
     try {
       await checkOwnerStatus();
