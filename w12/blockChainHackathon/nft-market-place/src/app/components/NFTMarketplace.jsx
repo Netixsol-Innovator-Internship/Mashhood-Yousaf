@@ -20,7 +20,6 @@ export default function NFTMarketplace() {
   const [basePrice, setBasePrice] = useState("0");
   const [displayPrices, setDisplayPrices] = useState({});
 
-
   const paymentTokens = [
     {
       address: CONTRACT_ADDRESSES.platformToken,
@@ -74,7 +73,12 @@ export default function NFTMarketplace() {
     }
   };
 
-  
+  useEffect(() => {
+    if (listings.length > 0 && selectedPaymentToken) {
+      updateDisplayedPrices(selectedPaymentToken);
+    }
+  }, [selectedPaymentToken, listings]);
+
   const initializeMarketplace = async () => {
     try {
       await checkOwnerStatus();
@@ -698,7 +702,14 @@ export default function NFTMarketplace() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  Price: {formatBalance(listing.priceInTokenA)} SMKT
+                  Price:{" "}
+                  {displayPrices[listing.tokenId]
+                    ? `${formatBalance(displayPrices[listing.tokenId])} ${
+                        paymentTokens.find(
+                          (t) => t.address === selectedPaymentToken
+                        )?.symbol
+                      }`
+                    : "Loading..."}
                 </p>
                 <p className="text-xs text-gray-500">
                   Seller: {listing.seller.slice(0, 6)}...
