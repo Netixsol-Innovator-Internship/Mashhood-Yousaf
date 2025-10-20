@@ -303,7 +303,8 @@ export default function NFTMarketplace() {
       const listTx = await marketplaceContract.listNFT(tokenId, priceWei);
       await listTx.wait();
 
-      alert("NFT listed successfully!");
+      // alert("NFT listed successfully!");
+      toast.success("NFT listed successfully!");
       setListPrice("");
       loadListings();
       loadUserNFTs();
@@ -328,7 +329,8 @@ export default function NFTMarketplace() {
       const unlistTx = await marketplaceContract.unlistNFT(tokenId);
       await unlistTx.wait();
 
-      alert("NFT unlisted successfully!");
+      // alert("NFT unlisted successfully!");
+      toast.success("NFT Un-listed successfully!");
       loadListings();
       loadUserNFTs();
     } catch (error) {
@@ -471,7 +473,8 @@ export default function NFTMarketplace() {
       await tx.wait();
       console.log("Transaction confirmed!");
 
-      alert("NFT purchased successfully!");
+      // alert("NFT purchased successfully!");
+      toast.success("NFT Purchased successfully!");
       loadListings();
       loadUserNFTs();
     } catch (error) {
@@ -528,7 +531,8 @@ export default function NFTMarketplace() {
       const mintTx = await nftContract.publicMint(mintURI);
       await mintTx.wait();
 
-      alert("NFT minted successfully!");
+      // alert("NFT minted successfully!");
+      toast.success("NFT minted successfully!");
       setMintURI("");
       loadUserNFTs();
     } catch (error) {
@@ -553,7 +557,8 @@ export default function NFTMarketplace() {
       const priceTx = await marketplaceContract.setBasePrice(priceWei);
       await priceTx.wait();
 
-      alert("Base price updated!");
+      // alert("Base price updated!");
+      toast.success("Base Price Updated");
       loadBasePrice();
     } catch (error) {
       console.error("❌ Error setting base price:", error);
@@ -568,7 +573,8 @@ export default function NFTMarketplace() {
     if (userNFTs.length > 0 && !userNFTs[0].isListed) {
       await listNFT(userNFTs[0].tokenId, "1.0"); // List for 1 SMKT
     } else {
-      alert("No unlisted NFTs found or first NFT is already listed");
+      // alert("No unlisted NFTs found or first NFT is already listed");
+      toast.success("No unlisted NFTs found or first NFT is already listed");
     }
   };
 

@@ -72,7 +72,8 @@
         const claimTx = await faucetContract.claimTokens();
         await claimTx.wait();
 
-        alert("Tokens claimed successfully!");
+        // alert("Tokens claimed successfully!");
+        toast.success("Tokens claimed successfully!");
         loadClaimInfo();
         loadFaucetBalance();
       } catch (error) {
