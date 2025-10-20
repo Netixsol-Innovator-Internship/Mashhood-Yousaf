@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 let provider;
 let signer;
 
+
 export const getProvider = () => {
   if (!provider) {
     if (typeof window !== "undefined" && window.ethereum) {

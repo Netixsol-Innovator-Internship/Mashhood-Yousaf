@@ -19,7 +19,6 @@ export default function NFTMarketplace() {
   const [debugInfo, setDebugInfo] = useState("");
   const [basePrice, setBasePrice] = useState("0");
 
-  // Map your addresses to the expected token names
   const paymentTokens = [
     {
       address: CONTRACT_ADDRESSES.platformToken,
@@ -262,7 +261,7 @@ export default function NFTMarketplace() {
       }
 
       const priceWei = ethers.parseUnits(priceInTokenA, 18);
-      console.log("Listing with price:", priceWei.toString());
+      console.log("Listing with price:", priceWei);
 
       const listTx = await marketplaceContract.listNFT(tokenId, priceWei);
       await listTx.wait();
@@ -341,9 +340,17 @@ export default function NFTMarketplace() {
 
         if (BigInt(allowance) < BigInt(priceInTokenA)) {
           console.log("Approving tokens...");
+          // const approveTx = await tokenAContract.approve(
+          //   CONTRACT_ADDRESSES.nftMarketplace,
+          //   priceInTokenA
+          // );
+          const approveAmount = ethers.parseUnits(
+            ethers.formatUnits(priceInTokenA, 18), // normalize to 18 decimals
+            18
+          );
           const approveTx = await tokenAContract.approve(
             CONTRACT_ADDRESSES.nftMarketplace,
-            priceInTokenA
+            approveAmount
           );
           await approveTx.wait();
           console.log("Tokens approved");
@@ -532,17 +539,17 @@ export default function NFTMarketplace() {
     <div className="space-y-6">
       {/* Debug Info */}
       <div className="glass-card p-4 rounded-2xl bg-yellow-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-2">
-          🔧 Debug Information
+        <h3 className="text-lg font-bold text-gray-200 mb-2">
+          Debug Information
         </h3>
-        <p className="text-sm text-gray-600 break-all">{debugInfo}</p>
-        <p className="text-sm text-gray-600">
-          Base Price: {formatBalance(basePrice)} SMKT
+        <p className="text-sm text-gray-300 break-all">{debugInfo}</p>
+        <p className="text-sm text-gray-300">
+          {/* Base Price: {formatBalance(basePrice)} SMKT */}
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-300">
           Listings Found: {listings.length}
         </p>
-        <p className="text-sm text-gray-600">Your NFTs: {userNFTs.length}</p>
+        <p className="text-sm text-gray-300">Your NFTs: {userNFTs.length}</p>
 
         {userNFTs.length > 0 && (
           <button
@@ -550,7 +557,7 @@ export default function NFTMarketplace() {
             disabled={loading}
             className="mt-2 btn-primary py-2 px-4 text-sm"
           >
-            🚀 Quick List First NFT
+            Quick List First NFT
           </button>
         )}
       </div>
@@ -558,15 +565,13 @@ export default function NFTMarketplace() {
       {/* Owner Controls */}
       {isOwner && (
         <div className="glass-card p-6 rounded-2xl">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            👑 Owner Controls
-          </h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Owner Controls</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <input
                 type="number"
                 placeholder="New Base Price (SMKT)"
-                className="input-field"
+                className="input-field text-white focus:text-black focus:bg-amber-300"
                 id="newBasePrice"
                 step="0.1"
                 min="0.1"
@@ -588,7 +593,7 @@ export default function NFTMarketplace() {
                 placeholder="Metadata URI (e.g., https://example.com/nft.json)"
                 value={mintURI}
                 onChange={(e) => setMintURI(e.target.value)}
-                className="input-field"
+                className="input-field text-white focus:text-black focus:bg-amber-300"
               />
               <button
                 onClick={mintNFT}
@@ -610,7 +615,7 @@ export default function NFTMarketplace() {
         <select
           value={selectedPaymentToken}
           onChange={(e) => setSelectedPaymentToken(e.target.value)}
-          className="input-field"
+          className="input-field text-white focus:text-black focus:bg-amber-300 "
         >
           {paymentTokens.map((token) => (
             <option key={token.address} value={token.address}>
@@ -629,17 +634,23 @@ export default function NFTMarketplace() {
 
       {/* NFT Listings */}
       <div className="glass-card p-6 rounded-2xl">
-        <h2 className="text-2xl font-bold text-white mb-4">🖼️ NFTs for Sale</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-2xl font-bold text-white mb-4">NFTs for Sale</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {listings.map((listing) => (
             <div
               key={listing.tokenId}
               className="bg-white rounded-lg p-4 shadow-lg"
             >
+              <span className="text-gray-500 mb-2 text-xs">
+                Token Id: {listing.tokenId}
+              </span>
               <div className="bg-gray-200 h-48 rounded-lg mb-3 flex items-center justify-center">
                 {listing.tokenURI ? (
                   <img
-                    src={listing.tokenURI}
+                    // src={listing.tokenURI}
+                    src={
+                      "https://gray-bright-hare-501.mypinata.cloud/ipfs/bafkreibn44zdwwz6yxxp2anp3dno4p4zn6hw7rvip5uveg4tgndipj5jcu"
+                    }
                     alt={`NFT ${listing.tokenId}`}
                     className="h-full w-full object-cover rounded-lg"
                     onError={(e) => {
@@ -649,7 +660,6 @@ export default function NFTMarketplace() {
                   />
                 ) : null}
                 <div className="hidden flex-col items-center justify-center text-center">
-                  <span className="text-gray-500">NFT #{listing.tokenId}</span>
                   <span className="text-gray-400 text-sm">No Image</span>
                 </div>
               </div>
@@ -693,8 +703,8 @@ export default function NFTMarketplace() {
             </div>
           ))}
           {listings.length === 0 && (
-            <div className="col-span-full text-center text-white py-8">
-              No NFTs currently listed for sale.
+            <div className="animate-pulse col-span-full text-center text-white py-8">
+              Loading NFTs...
               {userNFTs.length > 0 && " List your NFTs above to get started!"}
             </div>
           )}
@@ -704,7 +714,7 @@ export default function NFTMarketplace() {
       {/* User's NFTs */}
       <div className="glass-card p-6 rounded-2xl">
         <h2 className="text-2xl font-bold text-white mb-4">Your NFTs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {userNFTs.map((nft) => (
             <div
               key={nft.tokenId}
@@ -713,8 +723,11 @@ export default function NFTMarketplace() {
               <div className="bg-gray-200 h-48 rounded-lg mb-3 flex items-center justify-center">
                 {nft.tokenURI ? (
                   <img
-                    src={nft.tokenURI}
-                    alt={`NFT ${nft.tokenId}`}
+                    // src={nft.tokenURI}
+                    src={
+                      "https://gray-bright-hare-501.mypinata.cloud/ipfs/bafkreibn44zdwwz6yxxp2anp3dno4p4zn6hw7rvip5uveg4tgndipj5jcu"
+                    }
+                    alt={`NFT ${nft.tokenURI}`}
                     className="h-full w-full object-cover rounded-lg"
                   />
                 ) : (
@@ -771,7 +784,7 @@ export default function NFTMarketplace() {
       </div>
 
       {/* Mint Section for Non-Owners */}
-      {!isOwner && (
+      {/* {!isOwner && (
         <div className="glass-card p-6 rounded-2xl">
           <h2 className="text-2xl font-bold text-white mb-4">Mint New NFT</h2>
           <div className="flex gap-4">
@@ -791,10 +804,10 @@ export default function NFTMarketplace() {
             </button>
           </div>
           <p className="text-white text-sm mt-2">
-            Note: Minting requires paying {formatBalance(basePrice)} SMKT
+            Note: Minting requires paying Some SMKT Tokens
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
